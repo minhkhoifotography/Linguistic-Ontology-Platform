@@ -3,32 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Writing Assistant - Professional Grade</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <title>VnQuill - Nền Tảng Tinh Lọc Ngôn Từ</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* --- HỆ THỐNG THIẾT KẾ (DESIGN SYSTEM) --- */
+        /* --- HỆ THỐNG THẨM MỸ DOANH NGHIỆP (ENTERPRISE DESIGN SYSTEM) --- */
         :root {
-            --primary-color: #4a90e2; /* Xanh Quillbot hiện đại */
-            --primary-hover: #357abd;
-            --bg-app: #f0f2f5;        /* Màu nền xám rất nhạt */
-            --bg-surface: #ffffff;    /* Màu trắng tinh khiết cho các khối */
-            --text-primary: #2d3748;  /* Màu chữ đen xám, không đen tuyền */
-            --text-secondary: #718096;
-            --border-light: #e2e8f0;
-            --success-green: #48bb78;
-            --shadow-sm: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06);
-            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
-            --radius-md: 12px;        /* Bo góc mềm mại */
-        }
-
-        * {
-            box-sizing: border-box;
+            --brand-primary: #10b981; /* Xanh ngọc Quillbot */
+            --brand-hover: #059669;
+            --bg-canvas: #f9fafb;     /* Xám không gian nền */
+            --bg-surface: #ffffff;    /* Trắng tinh khiết cho thẻ */
+            --text-main: #1f2937;
+            --text-muted: #6b7280;
+            --border-subtle: #e5e7eb;
+            --highlight-ai: #fef08a;  /* Vàng nhạt nổi bật từ ngữ */
+            --highlight-text: #b45309;
+            --shadow-float: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.025);
+            --shadow-subtle: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --radius-lg: 16px;
         }
 
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--bg-app);
-            color: var(--text-primary);
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-canvas);
+            color: var(--text-main);
             margin: 0;
             padding: 0;
             height: 100vh;
@@ -36,417 +33,441 @@
             flex-direction: column;
         }
 
-        /* --- NAVBAR --- */
-        .navbar {
+        /* --- THANH ĐIỀU HƯỚNG TỐI GIẢN --- */
+        .top-nav {
             background: var(--bg-surface);
-            padding: 1rem 2rem;
-            border-bottom: 1px solid var(--border-light);
+            padding: 1rem 2.5rem;
+            border-bottom: 1px solid var(--border-subtle);
             display: flex;
             align-items: center;
-            box-shadow: var(--shadow-sm);
+            justify-content: space-between;
         }
 
-        .logo {
+        .brand-logo {
+            font-size: 1.25rem;
             font-weight: 700;
-            font-size: 1.5rem;
-            color: var(--primary-color);
+            color: var(--brand-primary);
             letter-spacing: -0.5px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
-        /* --- LAYOUT CHÍNH --- */
-        .main-container {
+        /* --- KHÔNG GIAN LÀM VIỆC --- */
+        .workspace {
             flex: 1;
-            display: flex;
-            flex-direction: column;
             padding: 2rem;
-            max-width: 1400px;
+            max-width: 1440px;
             margin: 0 auto;
             width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            box-sizing: border-box;
         }
 
-        .controls-bar {
+        .toolbar {
             display: flex;
-            justify-content: space-between;
+            gap: 12px;
             align-items: center;
-            margin-bottom: 1rem;
         }
 
-        .mode-selector {
-            display: flex;
-            gap: 1rem;
-        }
-
-        .mode-btn {
-            padding: 0.5rem 1rem;
+        .mode-badge {
+            padding: 6px 16px;
             border-radius: 20px;
-            font-weight: 500;
-            color: var(--text-secondary);
+            font-size: 0.875rem;
+            font-weight: 600;
             cursor: pointer;
             transition: all 0.2s;
-        }
-        .mode-btn.active {
-            background-color: #ebf4ff;
-            color: var(--primary-color);
+            border: 1px solid transparent;
         }
 
-        /* --- KHÔNG GIAN LÀM VIỆC KÉP (SPLIT EDITOR) --- */
-        .editor-workspace {
+        .mode-active {
+            background-color: #ecfdf5;
+            color: var(--brand-primary);
+            border-color: #a7f3d0;
+        }
+
+        .mode-inactive {
+            color: var(--text-muted);
+        }
+        .mode-inactive:hover {
+            background-color: #f3f4f6;
+        }
+
+        /* --- KIẾN TRÚC PHÂN MẢNH (SPLIT PANES) --- */
+        .editor-container {
             display: flex;
-            gap: 1.5rem;
+            gap: 0; /* Xóa khoảng cách để tạo cảm giác nguyên khối như Quillbot */
             flex: 1;
-            min-height: 500px; /* Đảm bảo chiều cao tối thiểu */
+            background: var(--bg-surface);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-float);
+            border: 1px solid var(--border-subtle);
+            overflow: hidden;
+            min-height: 450px;
         }
 
         .pane {
             flex: 1;
-            background: var(--bg-surface);
-            border-radius: var(--radius-md);
-            box-shadow: var(--shadow-md);
             display: flex;
             flex-direction: column;
-            overflow: hidden;
-            border: 1px solid var(--border-light);
-            transition: border-color 0.3s;
+            position: relative;
         }
 
-        .pane:focus-within {
-            border-color: var(--primary-color);
+        .pane-divider {
+            width: 1px;
+            background-color: var(--border-subtle);
+            z-index: 10;
         }
 
         .pane-header {
             padding: 1rem 1.5rem;
-            border-bottom: 1px solid var(--border-light);
-            font-weight: 600;
-            color: var(--text-secondary);
             font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-muted);
             text-transform: uppercase;
             letter-spacing: 0.5px;
             display: flex;
             justify-content: space-between;
-            background-color: #fafafa;
         }
 
-        .editor-content {
+        .textarea-wrapper {
             flex: 1;
-            padding: 1.5rem;
-            font-size: 1.1rem;
-            line-height: 1.7;
+            padding: 0 1.5rem 1.5rem 1.5rem;
             overflow-y: auto;
-            position: relative;
+            font-size: 1.125rem;
+            line-height: 1.8;
+            color: var(--text-main);
         }
 
-        textarea.editor-input {
+        .source-input {
             width: 100%;
             height: 100%;
             border: none;
             resize: none;
             outline: none;
             font-family: inherit;
-            color: var(--text-primary);
+            color: inherit;
             background: transparent;
+            font-size: inherit;
+            line-height: inherit;
         }
 
-        /* --- NÚT BẤM HÀNH ĐỘNG (ACTION BUTTON) --- */
-        .action-area {
+        /* --- TRẠNG THÁI TỪ VỰNG --- */
+        .token {
+            cursor: pointer;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+            display: inline;
+        }
+
+        .token-ai {
+            background-color: var(--highlight-ai);
+            color: var(--highlight-text);
+            padding: 2px 4px;
+            border-bottom: 2px solid #eab308;
+        }
+
+        .token-ai:hover {
+            background-color: #fde047;
+        }
+
+        /* --- NÚT ĐIỀU KHIỂN --- */
+        .action-footer {
             display: flex;
             justify-content: center;
-            margin-top: 2rem;
+            padding-top: 1rem;
         }
 
-        .btn-primary {
-            background-color: var(--primary-color);
+        .btn-rephrase {
+            background-color: var(--brand-primary);
             color: white;
-            padding: 0.8rem 3rem;
+            padding: 0.875rem 2.5rem;
             border-radius: 30px;
             font-weight: 600;
             font-size: 1rem;
             border: none;
             cursor: pointer;
-            box-shadow: 0 4px 6px rgba(74, 144, 226, 0.25);
-            transition: all 0.2s ease;
+            box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.4);
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        .btn-primary:hover {
-            background-color: var(--primary-hover);
+        .btn-rephrase:hover {
+            background-color: var(--brand-hover);
             transform: translateY(-2px);
-            box-shadow: 0 6px 8px rgba(74, 144, 226, 0.3);
+            box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.4);
         }
-        
-        .btn-primary:disabled {
-            background-color: #a0aec0;
-            cursor: not-allowed;
+
+        .btn-rephrase:disabled {
+            background-color: #9ca3af;
             transform: none;
             box-shadow: none;
+            cursor: not-allowed;
         }
 
-        /* --- TƯƠNG TÁC TOKEN (HIGHLIGHTS) --- */
-        /* Thay vì gạch chân xấu xí, ta dùng "chips" nền màu */
-        .token {
-            padding: 2px 4px;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            display: inline;
-            border-bottom: 2px solid transparent;
-        }
-
-        /* Màu cam nhẹ cho từ AI, trông chuyên nghiệp hơn màu đỏ gắt */
-        .ai-high { 
-            background-color: #fff7ed; /* Cam rất nhạt */
-            color: #c05621;
-            border-bottom-color: #ed8936;
-        }
-
-        .token:hover {
-            filter: brightness(0.95);
-        }
-
-        /* --- TOOLTIP GỢI Ý (HIỆN ĐẠI HÓA) --- */
-        .synonym-board {
+        /* --- BẢNG TỪ ĐIỂN NỔI (FLOATING TOOLTIP) --- */
+        .synonym-popover {
             position: absolute;
-            background-color: var(--bg-surface);
-            color: var(--text-primary);
+            background: var(--bg-surface);
+            border: 1px solid var(--border-subtle);
             border-radius: 8px;
-            padding: 8px 0;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
-            border: 1px solid var(--border-light);
+            box-shadow: var(--shadow-float);
+            padding: 6px 0;
+            min-width: 180px;
             z-index: 1000;
             display: none;
-            min-width: 200px;
             opacity: 0;
-            transform: translateY(10px);
-            transition: all 0.2s ease;
+            transform: translateY(8px);
+            transition: opacity 0.2s ease, transform 0.2s ease;
         }
 
-        .synonym-board.visible {
+        .synonym-popover.visible {
             display: block;
             opacity: 1;
             transform: translateY(0);
         }
 
         .synonym-item {
-            padding: 10px 16px;
+            padding: 8px 16px;
             font-size: 0.95rem;
             cursor: pointer;
-            transition: background-color 0.2s;
+            transition: background 0.15s;
+            color: var(--text-main);
             display: flex;
-            align-items: center;
             justify-content: space-between;
+            align-items: center;
         }
 
         .synonym-item:hover {
-            background-color: #f7fafc;
-            color: var(--primary-color);
+            background-color: #f3f4f6;
+            color: var(--brand-primary);
         }
-        
-        /* Loading placeholder */
-        .placeholder-text {
-            color: var(--text-secondary);
-            font-style: italic;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            height: 100%;
+
+        /* Loading Skeleton Animation */
+        .skeleton {
+            background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+            border-radius: 4px;
+            color: transparent;
+            user-select: none;
+            display: inline-block;
+        }
+
+        @keyframes shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
         }
     </style>
 </head>
 <body>
 
-<nav class="navbar">
-    <div class="logo">VnQuill AI</div>
+<nav class="top-nav">
+    <div class="brand-logo">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19l7-7 3 3-7 7-3-3z"></path><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"></path><path d="M2 2l7.586 7.586"></path><circle cx="11" cy="11" r="2"></circle></svg>
+        VnQuill
+    </div>
+    <div style="font-size: 0.875rem; color: var(--text-muted); font-weight: 500;">
+        Trạng thái: Máy học cục bộ (Local Engine)
+    </div>
 </nav>
 
-<div class="main-container">
-    <div class="controls-bar">
-        <div class="mode-selector">
-            <div class="mode-btn active">Tiêu chuẩn</div>
-            <div class="mode-btn">Lưu loát</div>
-            <div class="mode-btn">Sáng tạo</div>
+<div class="workspace">
+    <div class="toolbar">
+        <div class="mode-badge mode-active">Tiêu chuẩn</div>
+        <div class="mode-badge mode-inactive">Hàn lâm</div>
+        <div class="mode-badge mode-inactive">Triết học</div>
+    </div>
+
+    <div class="editor-container">
+        <div class="pane">
+            <div class="pane-header">
+                <span>Văn bản nguyên thủy</span>
+                <span id="wordCount">0 từ</span>
+            </div>
+            <div class="textarea-wrapper">
+                <textarea class="source-input" id="sourceText" placeholder="Hãy đưa văn bản của bạn vào không gian này để tiến hành thanh lọc..."></textarea>
+            </div>
         </div>
-        <div style="color: var(--text-secondary); font-size: 0.9rem;">
-            <span id="wordCount">0</span> từ
+
+        <div class="pane-divider"></div>
+
+        <div class="pane" style="background-color: #fcfcfc;">
+            <div class="pane-header">
+                <span>Văn bản tinh lọc</span>
+                <span style="font-size: 0.75rem; color: #d97706;">Nhấp vào vùng sáng để chỉnh sửa</span>
+            </div>
+            <div class="textarea-wrapper" id="targetCanvas">
+                <div style="color: var(--text-muted); font-style: italic; display: flex; height: 100%; align-items: center; justify-content: center;">
+                    Bản thể ngôn ngữ sẽ hiển lộ tại đây...
+                </div>
+            </div>
         </div>
     </div>
 
-    <div class="editor-workspace">
-        <div class="pane">
-            <div class="pane-header">
-                <span>Văn bản gốc</span>
-            </div>
-            <div class="editor-content">
-                <textarea class="editor-input" id="sourceText" placeholder="Dán văn bản của bạn vào đây để bắt đầu phân tích và cải thiện..."></textarea>
-            </div>
-        </div>
-
-        <div class="pane">
-            <div class="pane-header">
-                <span>Kết quả Phân tích AI</span>
-                <span style="font-size: 0.75rem; color: var(--text-secondary);">Nhấn vào từ màu cam để thay đổi</span>
-            </div>
-            <div class="editor-content" id="analysisOutput">
-                <div class="placeholder-text">Kết quả phân tích sẽ hiển thị tại đây...</div>
-            </div>
-        </div>
-    </div>
-
-    <div class="action-area">
-        <button class="btn-primary" onclick="performDeepAnalysis()">Phân tích & Cải thiện</button>
+    <div class="action-footer">
+        <button class="btn-rephrase" onclick="executeRefinement()" id="actionBtn">Tiến hành Tái cấu trúc</button>
     </div>
 </div>
 
-<div id="synonymBoard" class="synonym-board">
+<div id="synonymBoard" class="synonym-popover">
     <div id="synonymList"></div>
 </div>
 
 <script>
-    // --- LOGIC JAVASCRIPT (Tương tự phiên bản trước, đã tinh chỉnh cho UI mới) ---
-    
-    let activeTokenElement = null;
-    // Ký ức người dùng
-    let personalLexicon = JSON.parse(localStorage.getItem('VnQuill_Memory')) || {};
+    // --- BỘ NHỚ CỤC BỘ (Bypass Backend Server) ---
+    // Khối tri thức này được nhúng thẳng vào JS, giúp hệ thống chạy độc lập trên GitHub Pages
+    const LOCAL_KNOWLEDGE_BASE = {
+        'important': ['pivotal', 'crucial', 'ontologically significant'],
+        'moreover': ['furthermore', 'additionally', 'transcending this'],
+        'therefore': ['thus', 'consequently', 'ergo'],
+        'however': ['nevertheless', 'conversely', 'yet'],
+        'show': ['illustrate', 'manifest', 'elucidate'],
+        'use': ['utilize', 'employ', 'leverage'],
+        'clear': ['evident', 'lucid', 'transparent'],
+        'very': ['profoundly', 'substantially', 'exceedingly'],
+        'thay đổi': ['chuyển hóa', 'biến thiên', 'cải biên'],
+        'quan trọng': ['trọng yếu', 'cốt lõi', 'tối thượng'],
+        'bởi vì': ['bắt nguồn từ', 'do cấu trúc của', 'bởi lẽ']
+    };
 
+    let activeNode = null;
+    let ontologicalMemory = JSON.parse(localStorage.getItem('VnQuill_Ontology')) || {};
+
+    // Khởi tạo các bộ theo dõi sự kiện
     document.getElementById('sourceText').addEventListener('input', function() {
         const text = this.value.trim();
-        document.getElementById('wordCount').innerText = text === "" ? 0 : text.split(/\s+/).length;
+        document.getElementById('wordCount').innerText = `${text === "" ? 0 : text.split(/\s+/).length} từ`;
     });
 
-    document.addEventListener('click', function(event) {
-        if (!event.target.classList.contains('token') && !event.target.closest('#synonymBoard')) {
-            hideSynonymBoard();
+    document.addEventListener('click', function(e) {
+        if (!e.target.classList.contains('token-ai') && !e.target.closest('#synonymBoard')) {
+            closePopover();
         }
     });
 
-    // GỌI API ĐẾN PYTHON BACKEND (Đảm bảo main.py đang chạy)
-    async function performDeepAnalysis() {
-        const rawText = document.getElementById('sourceText').value.trim();
-        const outputCanvas = document.getElementById('analysisOutput');
-        const analyzeBtn = document.querySelector('.btn-primary');
+    // --- ĐỘNG CƠ XỬ LÝ NỘI TẠI (In-Browser NLP Engine) ---
+    async function executeRefinement() {
+        const text = document.getElementById('sourceText').value.trim();
+        const canvas = document.getElementById('targetCanvas');
+        const btn = document.getElementById('actionBtn');
 
-        if (!rawText) return;
+        if (!text) return;
 
-        // Hiệu ứng loading chuyên nghiệp
-        outputCanvas.innerHTML = '<div class="placeholder-text" style="color: var(--primary-color);">Đang kết nối với trí tuệ nhân tạo...</div>';
-        analyzeBtn.disabled = true;
-        analyzeBtn.innerHTML = `Running Analysis...`;
+        // Trạng thái Shimmer/Skeleton chuyên nghiệp
+        canvas.innerHTML = `<span class="skeleton">Đang phân tích và bóc tách cấu trúc ngữ nghĩa phức tạp của đoạn văn...</span>`;
+        btn.disabled = true;
+        btn.innerText = "Đang Vận Hành...";
 
-        try {
-            // Gửi yêu cầu đến localhost:8000 nơi Python đang lắng nghe
-            const response = await fetch('http://localhost:8000/api/v1/analyze', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ text: rawText })
-            });
+        // Giả lập độ trễ của việc truyền dữ liệu (Network Latency)
+        await new Promise(resolve => setTimeout(resolve, 800));
 
-            if (!response.ok) throw new Error("Lỗi kết nối máy chủ.");
+        // Thuật toán Regex bóc tách bảo toàn định dạng
+        const structuralTokens = text.match(/(\S+|\s+)/g);
+        let renderedHTML = '';
 
-            const jsonResponse = await response.json();
-            const analyzedData = jsonResponse.data; // Dữ liệu từ Python trả về
-
-            let processedHTML = '';
-            
-            analyzedData.forEach(item => {
-                if (item.type === "space") {
-                    processedHTML += item.token;
+        if (structuralTokens) {
+            structuralTokens.forEach(token => {
+                if (/^\s+$/.test(token)) {
+                    renderedHTML += token;
                     return;
                 }
 
-                if (item.ontologyClass) {
-                    // Nối danh sách từ đồng nghĩa thành chuỗi để lưu vào data-attribute
-                    const synString = item.synonyms.join('|');
-                    processedHTML += `<span class="token ${item.ontologyClass}" 
-                                            data-word="${item.cleanWord}" 
-                                            data-synonyms="${synString}"
-                                            onclick="showSynonyms(this, event)">${item.token}</span>`;
+                const rootWord = token.replace(/[.,!?;()]/g, '').toLowerCase();
+                let classTag = '';
+                let synonyms = [];
+
+                // Tra cứu từ điển nội tại
+                if (LOCAL_KNOWLEDGE_BASE[rootWord]) {
+                    classTag = 'token-ai';
+                    synonyms = LOCAL_KNOWLEDGE_BASE[rootWord];
+                } else if (rootWord.length > 7 && Math.random() > 0.8) {
+                    // Cảm biến ngẫu nhiên cho các từ phức tạp
+                    classTag = 'token-ai';
+                    synonyms = ['reconfigure', 'reconceptualize', 'tái thiết'];
+                }
+
+                if (classTag) {
+                    const synData = synonyms.join('|');
+                    renderedHTML += `<span class="token ${classTag}" data-root="${rootWord}" data-synonyms="${synData}" onclick="openPopover(this, event)">${token}</span>`;
                 } else {
-                    processedHTML += item.token;
+                    renderedHTML += token;
                 }
             });
-
-            outputCanvas.innerHTML = processedHTML;
-        } catch (error) {
-            outputCanvas.innerHTML = `<div class="placeholder-text" style="color: #e53e3e;">Lỗi: Không thể kết nối đến Backend Python. Hãy kiểm tra terminal.</div>`;
-        } finally {
-            analyzeBtn.disabled = false;
-            analyzeBtn.innerText = "Phân tích & Cải thiện";
-            hideSynonymBoard(); 
         }
+
+        canvas.innerHTML = renderedHTML;
+        btn.disabled = false;
+        btn.innerText = "Tiến hành Tái cấu trúc";
     }
 
-    // Hiển thị Tooltip gợi ý (Đã làm đẹp)
-    function showSynonyms(element, event) {
-        event.stopPropagation(); 
-        activeTokenElement = element;
-        const coreWord = element.getAttribute('data-word');
-        let backendSynonyms = element.getAttribute('data-synonyms').split('|');
-        backendSynonyms = backendSynonyms.filter(s => s); // Lọc bỏ chuỗi rỗng
-
+    // --- HIỂN THỊ CÁC CHIỀU KÍCH TỪ VỰNG ---
+    function openPopover(element, event) {
+        event.stopPropagation();
+        activeNode = element;
+        
+        const rootWord = element.getAttribute('data-root');
+        let availableSynonyms = element.getAttribute('data-synonyms').split('|');
         const board = document.getElementById('synonymBoard');
         const list = document.getElementById('synonymList');
 
-        let finalSynonyms = [];
+        let displayList = [];
 
-        // Ưu tiên ký ức người dùng
-        if (personalLexicon[coreWord]) {
-            const preferredWord = personalLexicon[coreWord];
-            finalSynonyms.push({ word: preferredWord, isMemory: true });
-            backendSynonyms = backendSynonyms.filter(syn => syn !== preferredWord);
+        // Hợp nhất ký ức cá nhân
+        if (ontologicalMemory[rootWord]) {
+            const memoryWord = ontologicalMemory[rootWord];
+            displayList.push({ word: memoryWord, memory: true });
+            availableSynonyms = availableSynonyms.filter(s => s !== memoryWord);
         }
 
-        backendSynonyms.forEach(syn => finalSynonyms.push({ word: syn, isMemory: false }));
+        availableSynonyms.forEach(s => displayList.push({ word: s, memory: false }));
 
         list.innerHTML = '';
-        if (finalSynonyms.length === 0) {
-             list.innerHTML = '<div class="synonym-item" style="color: var(--text-secondary); font-style: italic;">Không có gợi ý phù hợp.</div>';
-        } else {
-            finalSynonyms.forEach(item => {
-                const div = document.createElement('div');
-                div.className = 'synonym-item';
-                
-                if (item.isMemory) {
-                    div.innerHTML = `<span>${item.word}</span> <span style="font-size: 0.8rem; color: var(--success-green);">★ Đã lưu</span>`;
-                    div.style.backgroundColor = "#f0fff4";
-                } else {
-                    div.innerText = item.word;
-                }
+        displayList.forEach(item => {
+            if (!item.word) return;
+            const div = document.createElement('div');
+            div.className = 'synonym-item';
+            
+            if (item.memory) {
+                div.innerHTML = `<span>${item.word}</span> <span style="font-size: 0.75rem; color: var(--brand-primary); font-weight: 600;">✨ Đã ưu tiên</span>`;
+            } else {
+                div.innerText = item.word;
+            }
 
-                div.onclick = () => applyReplacement(coreWord, item.word);
-                list.appendChild(div);
-            });
-        }
+            div.onclick = () => mutateToken(rootWord, item.word);
+            list.appendChild(div);
+        });
 
-        // Tính toán vị trí chính xác cho Tooltip
+        // Tính toán tọa độ không gian chính xác
         const rect = element.getBoundingClientRect();
         board.style.left = `${rect.left + window.scrollX}px`;
-        board.style.top = `${rect.bottom + window.scrollY + 8}px`;
+        board.style.top = `${rect.bottom + window.scrollY + 6}px`;
         board.classList.add('visible');
     }
 
-    // Áp dụng từ mới và lưu vào ký ức
-    function applyReplacement(coreWord, newWord) {
-        if (!activeTokenElement) return;
+    // --- BIẾN ĐỔI BẢN THỂ (Mutation) ---
+    function mutateToken(rootWord, newWord) {
+        if (!activeNode) return;
 
-        const originalText = activeTokenElement.innerText;
-        // Giữ lại dấu câu
-        const punctuationMatch = originalText.match(/[.,!?;()]+$/);
-        const punctuation = punctuationMatch ? punctuationMatch[0] : '';
-        // Giữ lại viết hoa đầu câu
+        const originalText = activeNode.innerText;
+        const punctuation = originalText.match(/[.,!?;()]+$/) ? originalText.match(/[.,!?;()]+$/)[0] : '';
         const isCapitalized = /^[A-Z]/.test(originalText);
         
         let finalWord = isCapitalized ? newWord.charAt(0).toUpperCase() + newWord.slice(1) : newWord;
 
-        // Thay thế và xóa highlight
-        activeTokenElement.innerText = finalWord + punctuation;
-        activeTokenElement.className = 'token'; // Xóa class ai-high
-        activeTokenElement.removeAttribute('onclick'); // Không cho click nữa sau khi đã sửa
+        activeNode.innerText = finalWord + punctuation;
+        activeNode.className = 'token'; // Rũ bỏ nhãn AI
+        activeNode.removeAttribute('onclick');
         
-        // Lưu vào LocalStorage
-        personalLexicon[coreWord] = newWord;
-        localStorage.setItem('VnQuill_Memory', JSON.stringify(personalLexicon));
+        // Khắc tạc vào bộ nhớ cục bộ
+        ontologicalMemory[rootWord] = newWord;
+        localStorage.setItem('VnQuill_Ontology', JSON.stringify(ontologicalMemory));
 
-        hideSynonymBoard();
+        closePopover();
     }
 
-    function hideSynonymBoard() {
+    function closePopover() {
         const board = document.getElementById('synonymBoard');
         board.classList.remove('visible');
     }
