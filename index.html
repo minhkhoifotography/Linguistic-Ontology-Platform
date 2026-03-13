@@ -3,22 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VnQuill - Nền Tảng Tinh Lọc Ngôn Từ</title>
+    <title>VnQuill - Thẩm Định Bản Thể AI</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* --- HỆ THỐNG THẨM MỸ DOANH NGHIỆP (ENTERPRISE DESIGN SYSTEM) --- */
+        /* --- HỆ THỐNG THẨM MỸ QUANG HỌC (OPTICAL DESIGN SYSTEM) --- */
         :root {
-            --brand-primary: #10b981; /* Xanh ngọc Quillbot */
-            --brand-hover: #059669;
-            --bg-canvas: #f9fafb;     /* Xám không gian nền */
-            --bg-surface: #ffffff;    /* Trắng tinh khiết cho thẻ */
-            --text-main: #1f2937;
-            --text-muted: #6b7280;
-            --border-subtle: #e5e7eb;
-            --highlight-ai: #fef08a;  /* Vàng nhạt nổi bật từ ngữ */
-            --highlight-text: #b45309;
-            --shadow-float: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.025);
-            --shadow-subtle: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --brand-primary: #8b5cf6; /* Tím AI đặc trưng của các hệ thống phân tích sâu */
+            --brand-hover: #7c3aed;
+            --bg-canvas: #f8fafc;
+            --bg-surface: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --border-subtle: #e2e8f0;
+            --ai-highlight: #fef08a; /* Vàng rực báo hiệu xác suất AI cao */
+            --human-highlight: transparent;
+            --shadow-float: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
             --radius-lg: 16px;
         }
 
@@ -28,101 +27,58 @@
             color: var(--text-main);
             margin: 0;
             padding: 0;
-            height: 100vh;
+            min-height: 100vh;
             display: flex;
             flex-direction: column;
         }
 
-        /* --- THANH ĐIỀU HƯỚNG TỐI GIẢN --- */
+        /* --- THANH ĐIỀU HƯỚNG --- */
         .top-nav {
             background: var(--bg-surface);
             padding: 1rem 2.5rem;
             border-bottom: 1px solid var(--border-subtle);
             display: flex;
             align-items: center;
-            justify-content: space-between;
         }
 
         .brand-logo {
             font-size: 1.25rem;
             font-weight: 700;
             color: var(--brand-primary);
-            letter-spacing: -0.5px;
             display: flex;
             align-items: center;
             gap: 8px;
         }
 
-        /* --- KHÔNG GIAN LÀM VIỆC --- */
+        /* --- KHÔNG GIAN LÀM VIỆC CHÍNH (MAIN WORKSPACE) --- */
         .workspace {
             flex: 1;
             padding: 2rem;
-            max-width: 1440px;
+            max-width: 1200px;
             margin: 0 auto;
             width: 100%;
-            display: flex;
-            flex-direction: column;
-            gap: 1.5rem;
+            display: grid;
+            grid-template-columns: 1fr 350px; /* Chia tỷ lệ: Khung nhập liệu và Bảng điều khiển */
+            gap: 2rem;
             box-sizing: border-box;
         }
 
-        .toolbar {
-            display: flex;
-            gap: 12px;
-            align-items: center;
-        }
-
-        .mode-badge {
-            padding: 6px 16px;
-            border-radius: 20px;
-            font-size: 0.875rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-            border: 1px solid transparent;
-        }
-
-        .mode-active {
-            background-color: #ecfdf5;
-            color: var(--brand-primary);
-            border-color: #a7f3d0;
-        }
-
-        .mode-inactive {
-            color: var(--text-muted);
-        }
-        .mode-inactive:hover {
-            background-color: #f3f4f6;
-        }
-
-        /* --- KIẾN TRÚC PHÂN MẢNH (SPLIT PANES) --- */
-        .editor-container {
-            display: flex;
-            gap: 0; /* Xóa khoảng cách để tạo cảm giác nguyên khối như Quillbot */
-            flex: 1;
+        /* --- KHU VỰC NHẬP LIỆU & PHÂN TÍCH --- */
+        .editor-section {
             background: var(--bg-surface);
             border-radius: var(--radius-lg);
             box-shadow: var(--shadow-float);
             border: 1px solid var(--border-subtle);
-            overflow: hidden;
-            min-height: 450px;
-        }
-
-        .pane {
-            flex: 1;
             display: flex;
             flex-direction: column;
+            overflow: hidden;
+            min-height: 500px;
             position: relative;
         }
 
-        .pane-divider {
-            width: 1px;
-            background-color: var(--border-subtle);
-            z-index: 10;
-        }
-
-        .pane-header {
+        .editor-header {
             padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--border-subtle);
             font-size: 0.875rem;
             font-weight: 600;
             color: var(--text-muted);
@@ -132,13 +88,14 @@
             justify-content: space-between;
         }
 
-        .textarea-wrapper {
+        .text-canvas {
             flex: 1;
-            padding: 0 1.5rem 1.5rem 1.5rem;
-            overflow-y: auto;
+            padding: 1.5rem;
             font-size: 1.125rem;
             line-height: 1.8;
             color: var(--text-main);
+            overflow-y: auto;
+            position: relative;
         }
 
         .source-input {
@@ -152,324 +109,290 @@
             background: transparent;
             font-size: inherit;
             line-height: inherit;
+            position: absolute;
+            top: 0; left: 0;
+            padding: 1.5rem;
+            box-sizing: border-box;
+            z-index: 2;
         }
 
-        /* --- TRẠNG THÁI TỪ VỰNG --- */
-        .token {
-            cursor: pointer;
+        /* Khi có kết quả, khung nhập liệu trong suốt, nhường chỗ cho lớp phân tích hiện lên */
+        .source-input.analyzed {
+            color: transparent;
+            caret-color: var(--text-main);
+        }
+
+        .analysis-layer {
+            position: absolute;
+            top: 0; left: 0;
+            padding: 1.5rem;
+            width: 100%;
+            height: 100%;
+            box-sizing: border-box;
+            z-index: 1;
+            white-space: pre-wrap;
+            pointer-events: none;
+        }
+
+        /* Mệnh đề bị vạch trần */
+        .sentence-ai {
+            background-color: var(--ai-highlight);
             border-radius: 4px;
-            transition: background-color 0.2s;
-            display: inline;
+            box-shadow: 0 0 0 2px var(--ai-highlight); /* Hiệu ứng lan tỏa */
+            transition: background-color 0.3s ease;
         }
 
-        .token-ai {
-            background-color: var(--highlight-ai);
-            color: var(--highlight-text);
-            padding: 2px 4px;
-            border-bottom: 2px solid #eab308;
-        }
-
-        .token-ai:hover {
-            background-color: #fde047;
-        }
-
-        /* --- NÚT ĐIỀU KHIỂN --- */
-        .action-footer {
+        .editor-footer {
+            padding: 1rem 1.5rem;
+            border-top: 1px solid var(--border-subtle);
             display: flex;
-            justify-content: center;
-            padding-top: 1rem;
+            justify-content: flex-end;
         }
 
-        .btn-rephrase {
+        .btn-scan {
             background-color: var(--brand-primary);
             color: white;
-            padding: 0.875rem 2.5rem;
+            padding: 0.75rem 2rem;
             border-radius: 30px;
             font-weight: 600;
-            font-size: 1rem;
             border: none;
             cursor: pointer;
-            box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.4);
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.2s;
         }
+        .btn-scan:hover { background-color: var(--brand-hover); }
+        .btn-scan:disabled { background-color: #cbd5e1; cursor: not-allowed; }
 
-        .btn-rephrase:hover {
-            background-color: var(--brand-hover);
-            transform: translateY(-2px);
-            box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.4);
-        }
-
-        .btn-rephrase:disabled {
-            background-color: #9ca3af;
-            transform: none;
-            box-shadow: none;
-            cursor: not-allowed;
-        }
-
-        /* --- BẢNG TỪ ĐIỂN NỔI (FLOATING TOOLTIP) --- */
-        .synonym-popover {
-            position: absolute;
+        /* --- BẢNG ĐIỀU KHIỂN ĐỊNH LƯỢNG (GAUGE DASHBOARD) --- */
+        .dashboard-section {
             background: var(--bg-surface);
-            border: 1px solid var(--border-subtle);
-            border-radius: 8px;
+            border-radius: var(--radius-lg);
             box-shadow: var(--shadow-float);
-            padding: 6px 0;
-            min-width: 180px;
-            z-index: 1000;
-            display: none;
-            opacity: 0;
-            transform: translateY(8px);
-            transition: opacity 0.2s ease, transform 0.2s ease;
-        }
-
-        .synonym-popover.visible {
-            display: block;
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        .synonym-item {
-            padding: 8px 16px;
-            font-size: 0.95rem;
-            cursor: pointer;
-            transition: background 0.15s;
-            color: var(--text-main);
+            border: 1px solid var(--border-subtle);
+            padding: 2rem 1.5rem;
             display: flex;
-            justify-content: space-between;
+            flex-direction: column;
             align-items: center;
+            height: fit-content;
         }
 
-        .synonym-item:hover {
-            background-color: #f3f4f6;
-            color: var(--brand-primary);
+        .dashboard-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-main);
+            margin-bottom: 2rem;
         }
 
-        /* Loading Skeleton Animation */
-        .skeleton {
-            background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
-            background-size: 200% 100%;
-            animation: shimmer 1.5s infinite;
+        /* Vòng tròn định lượng AI (CSS Conic Gradient) */
+        .gauge-container {
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+            background: conic-gradient(#e2e8f0 100%, #e2e8f0 0);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            margin-bottom: 2rem;
+            transition: background 1s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .gauge-inner {
+            width: 140px;
+            height: 140px;
+            background: var(--bg-surface);
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .gauge-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--text-main);
+            line-height: 1;
+        }
+
+        .gauge-label {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        .legend {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.875rem;
+            color: var(--text-muted);
+        }
+
+        .color-box {
+            width: 16px;
+            height: 16px;
             border-radius: 4px;
-            color: transparent;
-            user-select: none;
-            display: inline-block;
         }
+        .box-ai { background-color: #fde047; }
+        .box-human { border: 1px solid var(--border-subtle); }
 
-        @keyframes shimmer {
-            0% { background-position: 200% 0; }
-            100% { background-position: -200% 0; }
-        }
     </style>
 </head>
 <body>
 
 <nav class="top-nav">
     <div class="brand-logo">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19l7-7 3 3-7 7-3-3z"></path><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"></path><path d="M2 2l7.586 7.586"></path><circle cx="11" cy="11" r="2"></circle></svg>
-        VnQuill
-    </div>
-    <div style="font-size: 0.875rem; color: var(--text-muted); font-weight: 500;">
-        Trạng thái: Máy học cục bộ (Local Engine)
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path><path d="M12 8v4l3 3"></path></svg>
+        VnQuill Detector
     </div>
 </nav>
 
 <div class="workspace">
-    <div class="toolbar">
-        <div class="mode-badge mode-active">Tiêu chuẩn</div>
-        <div class="mode-badge mode-inactive">Hàn lâm</div>
-        <div class="mode-badge mode-inactive">Triết học</div>
-    </div>
-
-    <div class="editor-container">
-        <div class="pane">
-            <div class="pane-header">
-                <span>Văn bản nguyên thủy</span>
-                <span id="wordCount">0 từ</span>
-            </div>
-            <div class="textarea-wrapper">
-                <textarea class="source-input" id="sourceText" placeholder="Hãy đưa văn bản của bạn vào không gian này để tiến hành thanh lọc..."></textarea>
-            </div>
+    <div class="editor-section">
+        <div class="editor-header">
+            <span>Văn bản cần kiểm định</span>
+            <span id="wordCount">0 từ</span>
         </div>
-
-        <div class="pane-divider"></div>
-
-        <div class="pane" style="background-color: #fcfcfc;">
-            <div class="pane-header">
-                <span>Văn bản tinh lọc</span>
-                <span style="font-size: 0.75rem; color: #d97706;">Nhấp vào vùng sáng để chỉnh sửa</span>
-            </div>
-            <div class="textarea-wrapper" id="targetCanvas">
-                <div style="color: var(--text-muted); font-style: italic; display: flex; height: 100%; align-items: center; justify-content: center;">
-                    Bản thể ngôn ngữ sẽ hiển lộ tại đây...
-                </div>
-            </div>
+        <div class="text-canvas">
+            <textarea class="source-input" id="sourceText" placeholder="Dán văn bản vào đây để khai phá cấu trúc và phát hiện những dấu ấn thống kê của trí tuệ nhân tạo..." oninput="resetAnalysis()"></textarea>
+            <div class="analysis-layer" id="analysisLayer"></div>
+        </div>
+        <div class="editor-footer">
+            <button class="btn-scan" id="actionBtn" onclick="executeDetection()">Kiểm định Dấu ấn AI</button>
         </div>
     </div>
 
-    <div class="action-footer">
-        <button class="btn-rephrase" onclick="executeRefinement()" id="actionBtn">Tiến hành Tái cấu trúc</button>
-    </div>
-</div>
+    <div class="dashboard-section">
+        <div class="dashboard-title">Bản Thể Thống Kê</div>
+        
+        <div class="gauge-container" id="gaugeRing">
+            <div class="gauge-inner">
+                <div class="gauge-value" id="aiScore">--%</div>
+                <div class="gauge-label">Xác suất AI</div>
+            </div>
+        </div>
 
-<div id="synonymBoard" class="synonym-popover">
-    <div id="synonymList"></div>
+        <div class="legend">
+            <div class="legend-item">
+                <div class="color-box box-ai"></div>
+                <span>Mệnh đề mang tính máy móc (Hội tụ xác suất)</span>
+            </div>
+            <div class="legend-item">
+                <div class="color-box box-human"></div>
+                <span>Mệnh đề do con người viết (Phi tuyến tính)</span>
+            </div>
+        </div>
+    </div>
 </div>
 
 <script>
-    // --- BỘ NHỚ CỤC BỘ (Bypass Backend Server) ---
-    // Khối tri thức này được nhúng thẳng vào JS, giúp hệ thống chạy độc lập trên GitHub Pages
-    const LOCAL_KNOWLEDGE_BASE = {
-        'important': ['pivotal', 'crucial', 'ontologically significant'],
-        'moreover': ['furthermore', 'additionally', 'transcending this'],
-        'therefore': ['thus', 'consequently', 'ergo'],
-        'however': ['nevertheless', 'conversely', 'yet'],
-        'show': ['illustrate', 'manifest', 'elucidate'],
-        'use': ['utilize', 'employ', 'leverage'],
-        'clear': ['evident', 'lucid', 'transparent'],
-        'very': ['profoundly', 'substantially', 'exceedingly'],
-        'thay đổi': ['chuyển hóa', 'biến thiên', 'cải biên'],
-        'quan trọng': ['trọng yếu', 'cốt lõi', 'tối thượng'],
-        'bởi vì': ['bắt nguồn từ', 'do cấu trúc của', 'bởi lẽ']
-    };
+    // --- ĐỘNG CƠ KIỂM ĐỊNH CẤP ĐỘ MỆNH ĐỀ (Sentence-Level Heuristic Engine) ---
+    // Khác với Paraphraser phân tích từng từ, AI Detector phân tích ngữ cảnh của cả một câu.
+    
+    // Từ điển Dấu ấn Máy móc (Machine Signatures): 
+    // Mạng nơ-ron thường ưu tiên những cụm từ tạo cấu trúc hàn lâm an toàn nhưng sáo rỗng.
+    const AI_SIGNATURES = [
+        'nhìn chung', 'tóm lại', 'tuy nhiên', 'bên cạnh đó', 'không thể phủ nhận',
+        'đóng vai trò quan trọng', 'minh chứng cho', 'sự đan xen', 'hơn thế nữa',
+        'để kết luận', 'thúc đẩy', 'khám phá', 'nhấn mạnh', 'vô cùng', 'đặc biệt là',
+        'trong bối cảnh', 'ngày càng', 'không chỉ', 'mà còn', 'sâu sắc'
+    ];
 
-    let activeNode = null;
-    let ontologicalMemory = JSON.parse(localStorage.getItem('VnQuill_Ontology')) || {};
+    const inputArea = document.getElementById('sourceText');
+    const layer = document.getElementById('analysisLayer');
+    const gaugeRing = document.getElementById('gaugeRing');
+    const aiScoreText = document.getElementById('aiScore');
 
-    // Khởi tạo các bộ theo dõi sự kiện
-    document.getElementById('sourceText').addEventListener('input', function() {
-        const text = this.value.trim();
+    // Theo dõi độ dài văn bản
+    function resetAnalysis() {
+        inputArea.classList.remove('analyzed');
+        layer.innerHTML = '';
+        gaugeRing.style.background = 'conic-gradient(#e2e8f0 100%, #e2e8f0 0)';
+        aiScoreText.innerText = '--%';
+        
+        const text = inputArea.value.trim();
         document.getElementById('wordCount').innerText = `${text === "" ? 0 : text.split(/\s+/).length} từ`;
-    });
+    }
 
-    document.addEventListener('click', function(e) {
-        if (!e.target.classList.contains('token-ai') && !e.target.closest('#synonymBoard')) {
-            closePopover();
-        }
-    });
-
-    // --- ĐỘNG CƠ XỬ LÝ NỘI TẠI (In-Browser NLP Engine) ---
-    async function executeRefinement() {
-        const text = document.getElementById('sourceText').value.trim();
-        const canvas = document.getElementById('targetCanvas');
+    // Thuật toán cốt lõi
+    async function executeDetection() {
+        const text = inputArea.value.trim();
         const btn = document.getElementById('actionBtn');
 
-        if (!text) return;
+        if (!text || text.length < 30) {
+            alert("Văn bản quá ngắn để thiết lập một mẫu thống kê (statistical pattern). Hãy nhập ít nhất 30 ký tự.");
+            return;
+        }
 
-        // Trạng thái Shimmer/Skeleton chuyên nghiệp
-        canvas.innerHTML = `<span class="skeleton">Đang phân tích và bóc tách cấu trúc ngữ nghĩa phức tạp của đoạn văn...</span>`;
         btn.disabled = true;
-        btn.innerText = "Đang Vận Hành...";
+        btn.innerText = "Đang rà quét cấu trúc...";
 
-        // Giả lập độ trễ của việc truyền dữ liệu (Network Latency)
+        // Giả lập độ trễ truy xuất mô hình Transformer (800ms)
         await new Promise(resolve => setTimeout(resolve, 800));
 
-        // Thuật toán Regex bóc tách bảo toàn định dạng
-        const structuralTokens = text.match(/(\S+|\s+)/g);
+        // Phân rã văn bản thành các mệnh đề (Sentences) dựa trên dấu câu kết thúc
+        // Biểu thức chính quy này giữ lại dấu câu đi kèm với câu
+        const sentences = text.match(/[^.!?]+[.!?]+/g) || [text];
+        
         let renderedHTML = '';
+        let aiSentenceCount = 0;
 
-        if (structuralTokens) {
-            structuralTokens.forEach(token => {
-                if (/^\s+$/.test(token)) {
-                    renderedHTML += token;
-                    return;
-                }
+        sentences.forEach(sentence => {
+            let signatureCount = 0;
+            const lowerSentence = sentence.toLowerCase();
 
-                const rootWord = token.replace(/[.,!?;()]/g, '').toLowerCase();
-                let classTag = '';
-                let synonyms = [];
-
-                // Tra cứu từ điển nội tại
-                if (LOCAL_KNOWLEDGE_BASE[rootWord]) {
-                    classTag = 'token-ai';
-                    synonyms = LOCAL_KNOWLEDGE_BASE[rootWord];
-                } else if (rootWord.length > 7 && Math.random() > 0.8) {
-                    // Cảm biến ngẫu nhiên cho các từ phức tạp
-                    classTag = 'token-ai';
-                    synonyms = ['reconfigure', 'reconceptualize', 'tái thiết'];
-                }
-
-                if (classTag) {
-                    const synData = synonyms.join('|');
-                    renderedHTML += `<span class="token ${classTag}" data-root="${rootWord}" data-synonyms="${synData}" onclick="openPopover(this, event)">${token}</span>`;
-                } else {
-                    renderedHTML += token;
+            // Rà quét sự xuất hiện của các dấu ấn máy móc
+            AI_SIGNATURES.forEach(sig => {
+                if (lowerSentence.includes(sig)) {
+                    signatureCount++;
                 }
             });
-        }
 
-        canvas.innerHTML = renderedHTML;
-        btn.disabled = false;
-        btn.innerText = "Tiến hành Tái cấu trúc";
-    }
-
-    // --- HIỂN THỊ CÁC CHIỀU KÍCH TỪ VỰNG ---
-    function openPopover(element, event) {
-        event.stopPropagation();
-        activeNode = element;
-        
-        const rootWord = element.getAttribute('data-root');
-        let availableSynonyms = element.getAttribute('data-synonyms').split('|');
-        const board = document.getElementById('synonymBoard');
-        const list = document.getElementById('synonymList');
-
-        let displayList = [];
-
-        // Hợp nhất ký ức cá nhân
-        if (ontologicalMemory[rootWord]) {
-            const memoryWord = ontologicalMemory[rootWord];
-            displayList.push({ word: memoryWord, memory: true });
-            availableSynonyms = availableSynonyms.filter(s => s !== memoryWord);
-        }
-
-        availableSynonyms.forEach(s => displayList.push({ word: s, memory: false }));
-
-        list.innerHTML = '';
-        displayList.forEach(item => {
-            if (!item.word) return;
-            const div = document.createElement('div');
-            div.className = 'synonym-item';
+            // Một thuật toán tham lam (greedy logic) đơn giản để phân loại:
+            // Nếu một câu có chứa từ 2 dấu ấn máy móc trở lên, hoặc nó là một câu quá dài mà không có ngắt nhịp,
+            // nó có xác suất cao là do AI sinh ra.
+            let isAI = false;
+            const wordCount = sentence.split(/\s+/).length;
             
-            if (item.memory) {
-                div.innerHTML = `<span>${item.word}</span> <span style="font-size: 0.75rem; color: var(--brand-primary); font-weight: 600;">✨ Đã ưu tiên</span>`;
-            } else {
-                div.innerText = item.word;
+            if (signatureCount >= 2 || (signatureCount >= 1 && wordCount > 25)) {
+                isAI = true;
+                aiSentenceCount++;
             }
 
-            div.onclick = () => mutateToken(rootWord, item.word);
-            list.appendChild(div);
+            // Gói mệnh đề vào không gian hiển thị
+            if (isAI) {
+                renderedHTML += `<span class="sentence-ai">${sentence}</span>`;
+            } else {
+                renderedHTML += sentence;
+            }
         });
 
-        // Tính toán tọa độ không gian chính xác
-        const rect = element.getBoundingClientRect();
-        board.style.left = `${rect.left + window.scrollX}px`;
-        board.style.top = `${rect.bottom + window.scrollY + 6}px`;
-        board.classList.add('visible');
-    }
+        // Ánh xạ đồ họa (Rendering the layers)
+        layer.innerHTML = renderedHTML;
+        inputArea.classList.add('analyzed'); // Làm mờ text gốc để highlight nổi lên
 
-    // --- BIẾN ĐỔI BẢN THỂ (Mutation) ---
-    function mutateToken(rootWord, newWord) {
-        if (!activeNode) return;
+        // Tính toán Toán học cho Bảng điều khiển (Gauge Math)
+        const percentage = Math.round((aiSentenceCount / sentences.length) * 100);
+        aiScoreText.innerText = `${percentage}%`;
 
-        const originalText = activeNode.innerText;
-        const punctuation = originalText.match(/[.,!?;()]+$/) ? originalText.match(/[.,!?;()]+$/)[0] : '';
-        const isCapitalized = /^[A-Z]/.test(originalText);
-        
-        let finalWord = isCapitalized ? newWord.charAt(0).toUpperCase() + newWord.slice(1) : newWord;
+        // Hoạt ảnh đổ màu cho Vòng tròn (CSS Conic Gradient Animation)
+        // Màu sắc chuyển từ xanh (người) sang vàng rực (máy) tùy theo tỷ lệ
+        let ringColor = '#10b981'; // Xanh ngọc
+        if (percentage > 40) ringColor = '#f59e0b'; // Cam nhạt
+        if (percentage > 70) ringColor = '#ef4444'; // Đỏ cảnh báo
 
-        activeNode.innerText = finalWord + punctuation;
-        activeNode.className = 'token'; // Rũ bỏ nhãn AI
-        activeNode.removeAttribute('onclick');
-        
-        // Khắc tạc vào bộ nhớ cục bộ
-        ontologicalMemory[rootWord] = newWord;
-        localStorage.setItem('VnQuill_Ontology', JSON.stringify(ontologicalMemory));
+        gaugeRing.style.background = `conic-gradient(${ringColor} ${percentage}%, #e2e8f0 ${percentage}%)`;
 
-        closePopover();
-    }
-
-    function closePopover() {
-        const board = document.getElementById('synonymBoard');
-        board.classList.remove('visible');
+        btn.disabled = false;
+        btn.innerText = "Kiểm định Dấu ấn AI";
     }
 </script>
 
