@@ -188,6 +188,111 @@
 
     // --- 3. THE DISSECTION ALGORITHM ---
     function performDeepAnalysis() {
+        // --- ĐỘNG CƠ THẨM ĐỊNH TỪ XA (Remote API Inference Engine) ---
+    async function performDeepAnalysis() {
+        const rawText = document.getElementById('sourceText').value.trim();
+        const outputCanvas = document.getElementById('analysisOutput');
+        const analyzeBtn = document.querySelector('.btn-analyze');
+
+        if (!rawText) return;
+
+        // Báo hiệu hệ thống đang kết nối
+        outputCanvas.innerHTML = '<span style="color: #3498db; font-style: italic;">Đang đồng bộ hóa với Động cơ Lõi (AI Engine)...</span>';
+        analyzeBtn.disabled = true;
+        analyzeBtn.innerText = "Đang Thẩm Định...";
+
+        try {
+            // Thực hiện lời gọi API đến máy chủ Python nội bộ của bạn
+            const response = await fetch('http://localhost:8000/api/v1/analyze', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ text: rawText })
+            });
+
+            if (!response.ok) throw new Error("Sự đứt gãy trong không gian mạng.");
+
+            const jsonResponse = await response.json();
+            const analyzedData = jsonResponse.data;
+
+            let processedHTML = '';
+            
+            // Xây dựng lại DOM dựa trên dữ liệu tri thức từ Backend gửi về
+            analyzedData.forEach(item => {
+                if (item.type === "space") {
+                    processedHTML += item.token;
+                    return;
+                }
+
+                if (item.ontologyClass) {
+                    // Nhúng danh sách từ đồng nghĩa AI trả về thẳng vào thuộc tính data-synonyms
+                    const synString = item.synonyms.join('|');
+                    processedHTML += `<span class="token ${item.ontologyClass}" 
+                                            data-word="${item.cleanWord}" 
+                                            data-synonyms="${synString}"
+                                            onclick="invokeDynamicSynonyms(this, event)">${item.token}</span>`;
+                } else {
+                    processedHTML += item.token;
+                }
+            });
+
+            outputCanvas.innerHTML = processedHTML;
+        } catch (error) {
+            outputCanvas.innerHTML = `<span style="color: #e74c3c;">Không thể triệu hồi Động cơ Lõi: ${error.message}. Hãy chắc chắn rằng máy chủ FastAPI đang chạy.</span>`;
+        } finally {
+            analyzeBtn.disabled = false;
+            analyzeBtn.innerText = "Execute Ontological Analysis";
+            hideSynonymBoard(); 
+        }
+    }
+
+    // --- XỬ LÝ SỰ KIỆN CLICK VÀO TỪ VỰNG (Hiển thị Tooltip) ---
+    function invokeDynamicSynonyms(element, event) {
+        event.stopPropagation(); 
+        activeTokenElement = element;
+        const coreWord = element.getAttribute('data-word');
+        // Lấy danh sách từ đồng nghĩa do Backend cấp phép
+        const backendSynonyms = element.getAttribute('data-synonyms').split('|');
+        
+        const board = document.getElementById('synonymBoard');
+        const list = document.getElementById('synonymList');
+
+        let finalSynonyms = [];
+
+        // Giao thoa Ký ức: Nếu từ vựng này đã từng được bạn tinh chỉnh (lưu trong LocalStorage)
+        if (personalLexicon[coreWord]) {
+            const preferredWord = personalLexicon[coreWord];
+            finalSynonyms.push(`${preferredWord} ✨ (Your Logos)`);
+            // Loại bỏ từ đã chọn khỏi danh sách gốc
+            const filteredBackend = backendSynonyms.filter(syn => syn !== preferredWord && syn !== "");
+            finalSynonyms = finalSynonyms.concat(filteredBackend);
+        } else {
+            finalSynonyms = backendSynonyms;
+        }
+
+        list.innerHTML = '';
+        finalSynonyms.forEach(syn => {
+            if(!syn) return;
+            const div = document.createElement('div');
+            div.className = 'synonym-item';
+            const cleanSyn = syn.replace(' ✨ (Your Logos)', '');
+            
+            if (syn.includes('✨')) {
+                div.innerHTML = `<strong>${cleanSyn}</strong> <span style="color:#f1c40f; font-size:10px;">✨ Ký ức</span>`;
+                div.style.borderLeft = "3px solid #f1c40f"; div.style.paddingLeft = "12px";
+            } else {
+                div.innerText = syn;
+            }
+
+            div.onclick = () => applyTransformation(coreWord, cleanSyn);
+            list.appendChild(div);
+        });
+
+        // Ánh xạ vị trí Tooltip
+        const rect = element.getBoundingClientRect();
+        board.style.left = `${rect.left + window.scrollX}px`;
+        board.style.top = `${rect.bottom + window.scrollY + 5}px`;
+        board.classList.add('visible');
+    }
         const rawText = document.getElementById('sourceText').value.trim();
         const outputCanvas = document.getElementById('analysisOutput');
         if (!rawText) return;
