@@ -3,398 +3,288 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VnQuill - Thẩm Định Bản Thể AI</title>
+    <title>VnQuill - Nền Tảng Ngôn Ngữ Toàn Diện</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* --- HỆ THỐNG THẨM MỸ QUANG HỌC (OPTICAL DESIGN SYSTEM) --- */
+        /* --- HỆ THỐNG BẢN THỂ QUANG HỌC --- */
         :root {
-            --brand-primary: #8b5cf6; /* Tím AI đặc trưng của các hệ thống phân tích sâu */
-            --brand-hover: #7c3aed;
-            --bg-canvas: #f8fafc;
+            --brand-primary: #10b981; /* Xanh ngọc Paraphraser */
+            --brand-secondary: #8b5cf6; /* Tím AI Detector */
+            --bg-canvas: #f3f4f6;
             --bg-surface: #ffffff;
-            --text-main: #0f172a;
-            --text-muted: #64748b;
-            --border-subtle: #e2e8f0;
-            --ai-highlight: #fef08a; /* Vàng rực báo hiệu xác suất AI cao */
-            --human-highlight: transparent;
+            --text-main: #1f2937;
+            --text-muted: #6b7280;
+            --border-subtle: #e5e7eb;
+            --ai-highlight: rgba(254, 240, 138, 0.8);
             --shadow-float: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
-            --radius-lg: 16px;
+            --radius-lg: 12px;
         }
 
         body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--bg-canvas);
-            color: var(--text-main);
-            margin: 0;
-            padding: 0;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
+            font-family: 'Inter', sans-serif; background-color: var(--bg-canvas);
+            color: var(--text-main); margin: 0; display: flex; flex-direction: column; min-height: 100vh;
         }
 
-        /* --- THANH ĐIỀU HƯỚNG --- */
+        /* --- THANH ĐIỀU HƯỚNG VÀ CHUYỂN ĐỔI CHẾ ĐỘ --- */
         .top-nav {
-            background: var(--bg-surface);
-            padding: 1rem 2.5rem;
-            border-bottom: 1px solid var(--border-subtle);
-            display: flex;
-            align-items: center;
+            background: var(--bg-surface); padding: 1rem 2rem;
+            border-bottom: 1px solid var(--border-subtle); display: flex; justify-content: space-between; align-items: center;
         }
-
-        .brand-logo {
-            font-size: 1.25rem;
-            font-weight: 700;
-            color: var(--brand-primary);
-            display: flex;
-            align-items: center;
-            gap: 8px;
+        .brand-logo { font-size: 1.25rem; font-weight: 700; color: var(--text-main); display: flex; align-items: center; gap: 8px; }
+        
+        .mode-switcher { display: flex; background: var(--bg-canvas); padding: 4px; border-radius: 8px; }
+        .tab-btn {
+            padding: 8px 16px; border: none; background: transparent; border-radius: 6px;
+            font-weight: 600; color: var(--text-muted); cursor: pointer; transition: all 0.2s;
         }
+        .tab-btn.active[data-mode="paraphrase"] { background: var(--bg-surface); color: var(--brand-primary); box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .tab-btn.active[data-mode="detect"] { background: var(--bg-surface); color: var(--brand-secondary); box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
 
-        /* --- KHÔNG GIAN LÀM VIỆC CHÍNH (MAIN WORKSPACE) --- */
-        .workspace {
-            flex: 1;
-            padding: 2rem;
-            max-width: 1200px;
-            margin: 0 auto;
-            width: 100%;
-            display: grid;
-            grid-template-columns: 1fr 350px; /* Chia tỷ lệ: Khung nhập liệu và Bảng điều khiển */
-            gap: 2rem;
-            box-sizing: border-box;
+        /* --- KHÔNG GIAN LÀM VIỆC TỔNG THỂ --- */
+        .workspace { flex: 1; padding: 2rem; max-width: 1200px; margin: 0 auto; width: 100%; box-sizing: border-box; }
+        .view-section { display: none; gap: 1.5rem; animation: fadeIn 0.3s ease; }
+        .view-section.active { display: flex; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* KHUNG NHẬP LIỆU CHUNG */
+        .editor-box {
+            background: var(--bg-surface); border-radius: var(--radius-lg); box-shadow: var(--shadow-float);
+            border: 1px solid var(--border-subtle); display: flex; flex-direction: column; overflow: hidden; position: relative;
         }
-
-        /* --- KHU VỰC NHẬP LIỆU & PHÂN TÍCH --- */
-        .editor-section {
-            background: var(--bg-surface);
-            border-radius: var(--radius-lg);
-            box-shadow: var(--shadow-float);
-            border: 1px solid var(--border-subtle);
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            min-height: 500px;
-            position: relative;
-        }
-
         .editor-header {
-            padding: 1rem 1.5rem;
-            border-bottom: 1px solid var(--border-subtle);
-            font-size: 0.875rem;
-            font-weight: 600;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            display: flex;
-            justify-content: space-between;
+            padding: 1rem 1.5rem; border-bottom: 1px solid var(--border-subtle);
+            font-size: 0.875rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase;
+        }
+        .text-canvas { flex: 1; position: relative; min-height: 400px; }
+        .raw-input {
+            width: 100%; height: 100%; border: none; resize: none; outline: none; padding: 1.5rem;
+            font-family: inherit; font-size: 1.125rem; line-height: 1.8; color: var(--text-main);
+            background: transparent; position: absolute; top: 0; left: 0; box-sizing: border-box; z-index: 2;
+        }
+        .raw-input.transparent-mode { color: transparent; caret-color: var(--text-main); }
+        .render-layer {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; padding: 1.5rem;
+            box-sizing: border-box; font-size: 1.125rem; line-height: 1.8; z-index: 1; white-space: pre-wrap; pointer-events: none;
         }
 
-        .text-canvas {
-            flex: 1;
-            padding: 1.5rem;
-            font-size: 1.125rem;
-            line-height: 1.8;
-            color: var(--text-main);
-            overflow-y: auto;
-            position: relative;
+        /* NÚT TƯƠNG TÁC */
+        .action-footer { padding: 1rem 1.5rem; border-top: 1px solid var(--border-subtle); display: flex; justify-content: flex-end; }
+        .btn-action {
+            padding: 0.75rem 2rem; border-radius: 30px; font-weight: 600; border: none; color: white; cursor: pointer; transition: 0.2s;
         }
+        .btn-para { background-color: var(--brand-primary); } .btn-para:hover { background-color: #059669; }
+        .btn-detect { background-color: var(--brand-secondary); } .btn-detect:hover { background-color: #7c3aed; }
+        .btn-action:disabled { background-color: #cbd5e1; cursor: not-allowed; }
 
-        .source-input {
-            width: 100%;
-            height: 100%;
-            border: none;
-            resize: none;
-            outline: none;
-            font-family: inherit;
-            color: inherit;
-            background: transparent;
-            font-size: inherit;
-            line-height: inherit;
-            position: absolute;
-            top: 0; left: 0;
-            padding: 1.5rem;
-            box-sizing: border-box;
-            z-index: 2;
+        /* --- CSS CHO PARAPHRASER --- */
+        #view-paraphrase { flex-direction: row; }
+        .split-pane { flex: 1; display: flex; flex-direction: column; }
+        .token-para { cursor: pointer; border-bottom: 2px solid #fbbf24; pointer-events: auto; }
+        .token-para:hover { background-color: #fef3c7; }
+
+        .synonym-popover {
+            position: absolute; background: var(--bg-surface); border: 1px solid var(--border-subtle);
+            border-radius: 8px; box-shadow: var(--shadow-float); padding: 6px 0; min-width: 180px; z-index: 1000;
+            display: none; opacity: 0; transition: 0.2s ease;
         }
+        .synonym-popover.visible { display: block; opacity: 1; }
+        .syn-item { padding: 8px 16px; font-size: 0.95rem; cursor: pointer; display: flex; justify-content: space-between; }
+        .syn-item:hover { background-color: #f3f4f6; color: var(--brand-primary); }
 
-        /* Khi có kết quả, khung nhập liệu trong suốt, nhường chỗ cho lớp phân tích hiện lên */
-        .source-input.analyzed {
-            color: transparent;
-            caret-color: var(--text-main);
+        /* --- CSS CHO DETECTOR --- */
+        #view-detect { display: grid; grid-template-columns: 1fr 320px; }
+        .token-ai-sentence { border-radius: 4px; pointer-events: auto; transition: 0.3s; }
+        
+        .dashboard { background: var(--bg-surface); border-radius: var(--radius-lg); border: 1px solid var(--border-subtle); padding: 2rem; display: flex; flex-direction: column; align-items: center; height: fit-content; }
+        .gauge-ring {
+            width: 160px; height: 160px; border-radius: 50%; background: conic-gradient(#e5e7eb 100%, #e5e7eb 0);
+            display: flex; align-items: center; justify-content: center; margin: 1.5rem 0; transition: background 1s ease;
         }
-
-        .analysis-layer {
-            position: absolute;
-            top: 0; left: 0;
-            padding: 1.5rem;
-            width: 100%;
-            height: 100%;
-            box-sizing: border-box;
-            z-index: 1;
-            white-space: pre-wrap;
-            pointer-events: none;
-        }
-
-        /* Mệnh đề bị vạch trần */
-        .sentence-ai {
-            background-color: var(--ai-highlight);
-            border-radius: 4px;
-            box-shadow: 0 0 0 2px var(--ai-highlight); /* Hiệu ứng lan tỏa */
-            transition: background-color 0.3s ease;
-        }
-
-        .editor-footer {
-            padding: 1rem 1.5rem;
-            border-top: 1px solid var(--border-subtle);
-            display: flex;
-            justify-content: flex-end;
-        }
-
-        .btn-scan {
-            background-color: var(--brand-primary);
-            color: white;
-            padding: 0.75rem 2rem;
-            border-radius: 30px;
-            font-weight: 600;
-            border: none;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        .btn-scan:hover { background-color: var(--brand-hover); }
-        .btn-scan:disabled { background-color: #cbd5e1; cursor: not-allowed; }
-
-        /* --- BẢNG ĐIỀU KHIỂN ĐỊNH LƯỢNG (GAUGE DASHBOARD) --- */
-        .dashboard-section {
-            background: var(--bg-surface);
-            border-radius: var(--radius-lg);
-            box-shadow: var(--shadow-float);
-            border: 1px solid var(--border-subtle);
-            padding: 2rem 1.5rem;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            height: fit-content;
-        }
-
-        .dashboard-title {
-            font-size: 1rem;
-            font-weight: 600;
-            color: var(--text-main);
-            margin-bottom: 2rem;
-        }
-
-        /* Vòng tròn định lượng AI (CSS Conic Gradient) */
-        .gauge-container {
-            width: 180px;
-            height: 180px;
-            border-radius: 50%;
-            background: conic-gradient(#e2e8f0 100%, #e2e8f0 0);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            margin-bottom: 2rem;
-            transition: background 1s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
         .gauge-inner {
-            width: 140px;
-            height: 140px;
-            background: var(--bg-surface);
-            border-radius: 50%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+            width: 120px; height: 120px; background: var(--bg-surface); border-radius: 50%;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
         }
-
-        .gauge-value {
-            font-size: 2.5rem;
-            font-weight: 700;
-            color: var(--text-main);
-            line-height: 1;
-        }
-
-        .gauge-label {
-            font-size: 0.875rem;
-            color: var(--text-muted);
-            margin-top: 4px;
-        }
-
-        .legend {
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .legend-item {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 0.875rem;
-            color: var(--text-muted);
-        }
-
-        .color-box {
-            width: 16px;
-            height: 16px;
-            border-radius: 4px;
-        }
-        .box-ai { background-color: #fde047; }
-        .box-human { border: 1px solid var(--border-subtle); }
-
+        .gauge-score { font-size: 2.5rem; font-weight: 700; }
     </style>
 </head>
 <body>
 
 <nav class="top-nav">
-    <div class="brand-logo">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path><path d="M12 8v4l3 3"></path></svg>
-        VnQuill Detector
+    <div class="brand-logo">VnQuill</div>
+    <div class="mode-switcher">
+        <button class="tab-btn active" data-mode="paraphrase" onclick="switchMode('paraphrase')">Tinh Lọc</button>
+        <button class="tab-btn" data-mode="detect" onclick="switchMode('detect')">Thẩm Định AI</button>
     </div>
 </nav>
 
 <div class="workspace">
-    <div class="editor-section">
-        <div class="editor-header">
-            <span>Văn bản cần kiểm định</span>
-            <span id="wordCount">0 từ</span>
+    <div id="view-paraphrase" class="view-section active">
+        <div class="editor-box split-pane">
+            <div class="editor-header">Văn bản gốc</div>
+            <div class="text-canvas"><textarea class="raw-input" id="inputPara" placeholder="Dán văn bản cần tái cấu trúc..."></textarea></div>
+            <div class="action-footer"><button class="btn-action btn-para" id="btnPara" onclick="executeParaphrase()">Tái Cấu Trúc</button></div>
         </div>
-        <div class="text-canvas">
-            <textarea class="source-input" id="sourceText" placeholder="Dán văn bản vào đây để khai phá cấu trúc và phát hiện những dấu ấn thống kê của trí tuệ nhân tạo..." oninput="resetAnalysis()"></textarea>
-            <div class="analysis-layer" id="analysisLayer"></div>
-        </div>
-        <div class="editor-footer">
-            <button class="btn-scan" id="actionBtn" onclick="executeDetection()">Kiểm định Dấu ấn AI</button>
+        <div class="editor-box split-pane" style="background: #fafafa;">
+            <div class="editor-header">Bản thể hiển lộ</div>
+            <div class="text-canvas"><div class="render-layer" id="outputPara" style="pointer-events: auto;"></div></div>
         </div>
     </div>
 
-    <div class="dashboard-section">
-        <div class="dashboard-title">Bản Thể Thống Kê</div>
-        
-        <div class="gauge-container" id="gaugeRing">
-            <div class="gauge-inner">
-                <div class="gauge-value" id="aiScore">--%</div>
-                <div class="gauge-label">Xác suất AI</div>
+    <div id="view-detect" class="view-section">
+        <div class="editor-box">
+            <div class="editor-header">Không gian Kiểm định</div>
+            <div class="text-canvas">
+                <textarea class="raw-input" id="inputDetect" placeholder="Dán văn bản để khai phá phương sai thống kê..." oninput="resetDetector()"></textarea>
+                <div class="render-layer" id="layerDetect"></div>
             </div>
+            <div class="action-footer"><button class="btn-action btn-detect" id="btnDetect" onclick="executeDetection()">Khai Phá Dấu Ấn</button></div>
         </div>
-
-        <div class="legend">
-            <div class="legend-item">
-                <div class="color-box box-ai"></div>
-                <span>Mệnh đề mang tính máy móc (Hội tụ xác suất)</span>
+        <div class="dashboard">
+            <div style="font-weight: 600;">Xác suất Trí tuệ Nhân tạo</div>
+            <div class="gauge-ring" id="gaugeRing">
+                <div class="gauge-inner">
+                    <div class="gauge-score" id="aiScore">--%</div>
+                </div>
             </div>
-            <div class="legend-item">
-                <div class="color-box box-human"></div>
-                <span>Mệnh đề do con người viết (Phi tuyến tính)</span>
-            </div>
+            <div style="font-size: 0.875rem; color: var(--text-muted); text-align: center;">Đánh giá dựa trên Phương sai độ dài mệnh đề và Mật độ Từ vựng.</div>
         </div>
     </div>
 </div>
 
+<div id="synonymBoard" class="synonym-popover"><div id="synonymList"></div></div>
+
 <script>
-    // --- ĐỘNG CƠ KIỂM ĐỊNH CẤP ĐỘ MỆNH ĐỀ (Sentence-Level Heuristic Engine) ---
-    // Khác với Paraphraser phân tích từng từ, AI Detector phân tích ngữ cảnh của cả một câu.
+    /* --- LÕI TRI THỨC VÀ KÝ ỨC --- */
+    const KNOWLEDGE_BASE = {
+        'important': ['pivotal', 'crucial', 'ontologically significant'], 'moreover': ['furthermore', 'additionally'],
+        'therefore': ['thus', 'consequently'], 'show': ['illustrate', 'elucidate'], 'clear': ['evident', 'lucid'],
+        'tuy nhiên': ['mặc dù vậy', 'dẫu vậy'], 'quan trọng': ['trọng yếu', 'cốt lõi']
+    };
+    const AI_SIGNATURES = ['nhìn chung', 'tóm lại', 'tuy nhiên', 'bên cạnh đó', 'đóng vai trò', 'minh chứng', 'hơn thế nữa', 'đặc biệt là', 'ngày càng'];
     
-    // Từ điển Dấu ấn Máy móc (Machine Signatures): 
-    // Mạng nơ-ron thường ưu tiên những cụm từ tạo cấu trúc hàn lâm an toàn nhưng sáo rỗng.
-    const AI_SIGNATURES = [
-        'nhìn chung', 'tóm lại', 'tuy nhiên', 'bên cạnh đó', 'không thể phủ nhận',
-        'đóng vai trò quan trọng', 'minh chứng cho', 'sự đan xen', 'hơn thế nữa',
-        'để kết luận', 'thúc đẩy', 'khám phá', 'nhấn mạnh', 'vô cùng', 'đặc biệt là',
-        'trong bối cảnh', 'ngày càng', 'không chỉ', 'mà còn', 'sâu sắc'
-    ];
+    let ontologicalMemory = JSON.parse(localStorage.getItem('VnQuill_Ontology')) || {};
+    let activeToken = null;
 
-    const inputArea = document.getElementById('sourceText');
-    const layer = document.getElementById('analysisLayer');
-    const gaugeRing = document.getElementById('gaugeRing');
-    const aiScoreText = document.getElementById('aiScore');
-
-    // Theo dõi độ dài văn bản
-    function resetAnalysis() {
-        inputArea.classList.remove('analyzed');
-        layer.innerHTML = '';
-        gaugeRing.style.background = 'conic-gradient(#e2e8f0 100%, #e2e8f0 0)';
-        aiScoreText.innerText = '--%';
-        
-        const text = inputArea.value.trim();
-        document.getElementById('wordCount').innerText = `${text === "" ? 0 : text.split(/\s+/).length} từ`;
+    /* --- ĐIỀU HƯỚNG KHÔNG GIAN --- */
+    function switchMode(mode) {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.view-section').forEach(v => v.classList.remove('active'));
+        document.querySelector(`.tab-btn[data-mode="${mode}"]`).classList.add('active');
+        document.getElementById(`view-${mode}`).classList.add('active');
+        document.getElementById('synonymBoard').classList.remove('visible');
     }
 
-    // Thuật toán cốt lõi
-    async function executeDetection() {
-        const text = inputArea.value.trim();
-        const btn = document.getElementById('actionBtn');
-
-        if (!text || text.length < 30) {
-            alert("Văn bản quá ngắn để thiết lập một mẫu thống kê (statistical pattern). Hãy nhập ít nhất 30 ký tự.");
-            return;
-        }
-
-        btn.disabled = true;
-        btn.innerText = "Đang rà quét cấu trúc...";
-
-        // Giả lập độ trễ truy xuất mô hình Transformer (800ms)
-        await new Promise(resolve => setTimeout(resolve, 800));
-
-        // Phân rã văn bản thành các mệnh đề (Sentences) dựa trên dấu câu kết thúc
-        // Biểu thức chính quy này giữ lại dấu câu đi kèm với câu
-        const sentences = text.match(/[^.!?]+[.!?]+/g) || [text];
+    /* --- ĐỘNG CƠ TINH LỌC (PARAPHRASER) --- */
+    async function executeParaphrase() {
+        const text = document.getElementById('inputPara').value.trim();
+        if (!text) return;
         
-        let renderedHTML = '';
-        let aiSentenceCount = 0;
-
-        sentences.forEach(sentence => {
-            let signatureCount = 0;
-            const lowerSentence = sentence.toLowerCase();
-
-            // Rà quét sự xuất hiện của các dấu ấn máy móc
-            AI_SIGNATURES.forEach(sig => {
-                if (lowerSentence.includes(sig)) {
-                    signatureCount++;
-                }
-            });
-
-            // Một thuật toán tham lam (greedy logic) đơn giản để phân loại:
-            // Nếu một câu có chứa từ 2 dấu ấn máy móc trở lên, hoặc nó là một câu quá dài mà không có ngắt nhịp,
-            // nó có xác suất cao là do AI sinh ra.
-            let isAI = false;
-            const wordCount = sentence.split(/\s+/).length;
+        const btn = document.getElementById('btnPara');
+        const output = document.getElementById('outputPara');
+        btn.disabled = true; btn.innerText = "Đang xử lý...";
+        
+        await new Promise(r => setTimeout(r, 600)); // Simulate Engine
+        
+        const tokens = text.match(/(\S+|\s+)/g) || [];
+        let html = '';
+        
+        tokens.forEach(token => {
+            if (/^\s+$/.test(token)) { html += token; return; }
+            const root = token.replace(/[.,!?;()]/g, '').toLowerCase();
             
-            if (signatureCount >= 2 || (signatureCount >= 1 && wordCount > 25)) {
-                isAI = true;
-                aiSentenceCount++;
-            }
+            let syns = KNOWLEDGE_BASE[root] || (root.length > 7 && Math.random() > 0.8 ? ['tái cấu trúc', 'hiệu chỉnh'] : null);
+            if (syns) {
+                html += `<span class="token-para" data-root="${root}" data-syns="${syns.join('|')}" onclick="openSynonyms(this, event)">${token}</span>`;
+            } else { html += token; }
+        });
+        
+        output.innerHTML = html;
+        btn.disabled = false; btn.innerText = "Tái Cấu Trúc";
+    }
 
-            // Gói mệnh đề vào không gian hiển thị
-            if (isAI) {
-                renderedHTML += `<span class="sentence-ai">${sentence}</span>`;
-            } else {
-                renderedHTML += sentence;
-            }
+    function openSynonyms(el, e) {
+        e.stopPropagation(); activeToken = el;
+        const root = el.getAttribute('data-root');
+        let syns = el.getAttribute('data-syns').split('|');
+        const list = document.getElementById('synonymList');
+        
+        let display = [];
+        if (ontologicalMemory[root]) {
+            display.push({ w: ontologicalMemory[root], mem: true });
+            syns = syns.filter(s => s !== ontologicalMemory[root]);
+        }
+        syns.forEach(s => display.push({ w: s, mem: false }));
+
+        list.innerHTML = '';
+        display.forEach(item => {
+            const div = document.createElement('div'); div.className = 'syn-item';
+            div.innerHTML = item.mem ? `<span>${item.w}</span><span style="color:var(--brand-primary); font-size:12px;">★</span>` : item.w;
+            div.onclick = () => {
+                const isCap = /^[A-Z]/.test(el.innerText);
+                const punc = el.innerText.match(/[.,!?;()]+$/) || [''];
+                el.innerText = (isCap ? item.w.charAt(0).toUpperCase() + item.w.slice(1) : item.w) + punc[0];
+                el.className = ''; el.removeAttribute('onclick');
+                ontologicalMemory[root] = item.w; localStorage.setItem('VnQuill_Ontology', JSON.stringify(ontologicalMemory));
+                document.getElementById('synonymBoard').classList.remove('visible');
+            };
+            list.appendChild(div);
         });
 
-        // Ánh xạ đồ họa (Rendering the layers)
-        layer.innerHTML = renderedHTML;
-        inputArea.classList.add('analyzed'); // Làm mờ text gốc để highlight nổi lên
+        const board = document.getElementById('synonymBoard');
+        const rect = el.getBoundingClientRect();
+        board.style.left = `${rect.left + window.scrollX}px`; board.style.top = `${rect.bottom + window.scrollY + 5}px`;
+        board.classList.add('visible');
+    }
+    document.addEventListener('click', () => document.getElementById('synonymBoard').classList.remove('visible'));
 
-        // Tính toán Toán học cho Bảng điều khiển (Gauge Math)
-        const percentage = Math.round((aiSentenceCount / sentences.length) * 100);
-        aiScoreText.innerText = `${percentage}%`;
+    /* --- ĐỘNG CƠ THẨM ĐỊNH (AI DETECTOR) --- */
+    function resetDetector() {
+        document.getElementById('inputDetect').classList.remove('transparent-mode');
+        document.getElementById('layerDetect').innerHTML = '';
+        document.getElementById('gaugeRing').style.background = 'conic-gradient(#e5e7eb 100%, #e5e7eb 0)';
+        document.getElementById('aiScore').innerText = '--%';
+    }
 
-        // Hoạt ảnh đổ màu cho Vòng tròn (CSS Conic Gradient Animation)
-        // Màu sắc chuyển từ xanh (người) sang vàng rực (máy) tùy theo tỷ lệ
-        let ringColor = '#10b981'; // Xanh ngọc
-        if (percentage > 40) ringColor = '#f59e0b'; // Cam nhạt
-        if (percentage > 70) ringColor = '#ef4444'; // Đỏ cảnh báo
+    async function executeDetection() {
+        const text = document.getElementById('inputDetect').value.trim();
+        if (text.length < 50) return alert("Văn bản quá ngắn để phân tích phương sai.");
+        
+        const btn = document.getElementById('btnDetect');
+        btn.disabled = true; btn.innerText = "Đang Quét...";
+        await new Promise(r => setTimeout(r, 800));
 
-        gaugeRing.style.background = `conic-gradient(${ringColor} ${percentage}%, #e2e8f0 ${percentage}%)`;
+        const sentences = text.match(/[^.!?]+[.!?]+/g) || [text];
+        const lengths = sentences.map(s => s.trim().split(/\s+/).length);
+        const mean = lengths.reduce((a,b)=>a+b,0) / lengths.length;
+        const variance = lengths.reduce((a,b)=>a+Math.pow(b-mean,2),0) / lengths.length;
+        
+        let aiSentences = 0; let html = '';
+        
+        sentences.forEach((s, i) => {
+            const lower = s.toLowerCase();
+            let sigCount = AI_SIGNATURES.filter(sig => lower.includes(sig)).length;
+            let prob = (sigCount * 30) + (Math.abs(lengths[i] - mean) < 3 ? 20 : 0) + (lengths[i] > 30 && sigCount > 0 ? 25 : 0);
+            
+            if (prob >= 50) {
+                aiSentences++;
+                const alpha = Math.min(1, prob/100);
+                html += `<span class="token-ai-sentence" style="background: rgba(254,240,138,${alpha}); box-shadow: 0 0 0 2px rgba(254,240,138,${alpha});">${s}</span>`;
+            } else { html += s; }
+        });
 
-        btn.disabled = false;
-        btn.innerText = "Kiểm định Dấu ấn AI";
+        document.getElementById('layerDetect').innerHTML = html;
+        document.getElementById('inputDetect').classList.add('transparent-mode');
+
+        const baseScore = (aiSentences / sentences.length) * 100;
+        const burstScore = Math.max(0, 100 - (variance * 4));
+        const finalScore = Math.min(100, Math.round((baseScore * 0.6) + (burstScore * 0.4)));
+
+        document.getElementById('aiScore').innerText = `${finalScore}%`;
+        let color = finalScore > 70 ? '#ef4444' : finalScore > 40 ? '#f59e0b' : '#10b981';
+        document.getElementById('gaugeRing').style.background = `conic-gradient(${color} ${finalScore}%, #e5e7eb ${finalScore}%)`;
+
+        btn.disabled = false; btn.innerText = "Khai Phá Dấu Ấn";
     }
 </script>
-
 </body>
 </html>
