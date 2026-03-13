@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nền tảng Thẩm định Bản thể Ngôn ngữ</title>
+    <style>
+        :root {
+            --bg-color: #fcfcfc;
+            --text-color: #1a1a1a;
+            --accent-color: #2c3e50;
+            --border-color: #e0e0e0;
+        }
+        body {
+            font-family: 'Georgia', serif; /* Phản ánh sự tĩnh lặng của văn bản hàn lâm */
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.8;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            width: 100%;
+            max-width: 800px;
+            padding: 40px;
+            background: #ffffff;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            border-radius: 8px;
+        }
+        h1 {
+            font-size: 24px;
+            font-weight: normal;
+            text-align: center;
+            margin-bottom: 10px;
+            letter-spacing: 1px;
+        }
+        p.subtitle {
+            text-align: center;
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 30px;
+            font-style: italic;
+        }
+        textarea {
+            width: 100%;
+            height: 250px;
+            padding: 20px;
+            font-family: inherit;
+            font-size: 16px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            resize: vertical;
+            box-sizing: border-box;
+            transition: border-color 0.3s ease;
+        }
+        textarea:focus {
+            outline: none;
+            border-color: var(--accent-color);
+        }
+        button {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            margin-top: 20px;
+            background-color: var(--accent-color);
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            font-family: inherit;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #1a252f;
+        }
+        #results {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #f9f9f9;
+            border-left: 4px solid var(--accent-color);
+            display: none; /* Ẩn cho đến khi có sự hiển lộ của dữ liệu */
+        }
+        .metric {
+            margin-bottom: 15px;
+        }
+        .metric-title {
+            font-weight: bold;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .metric-value {
+            font-size: 20px;
+            color: var(--accent-color);
+        }
+        .philosophical-insight {
+            font-style: italic;
+            font-size: 14px;
+            color: #555;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Thẩm định Bản thể Ngôn từ</h1>
+    <p class="subtitle">Khám phá ranh giới giữa tư duy phi tuyến của nhân loại và sự hội tụ xác suất của máy móc.</p>
+    
+    <textarea id="textInput" placeholder="Hãy đổ tràn những suy tư của bạn vào không gian này..."></textarea>
+    <button onclick="analyzeOntology()">Tiến hành Khai phá Logic</button>
+
+    <div id="results">
+        <div class="metric">
+            <div class="metric-title">Chỉ số Burstiness (Phương sai Nhịp điệu):</div>
+            <div class="metric-value" id="burstinessValue">0.00</div>
+            <div class="philosophical-insight" id="burstinessInsight"></div>
+        </div>
+        <div class="metric">
+            <div class="metric-title">Ước lượng Perplexity (Độ bất định Từ vựng):</div>
+            <div class="metric-value" id="perplexityValue">0.00</div>
+            <div class="philosophical-insight" id="perplexityInsight"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Kiến trúc Logic Lõi (Core Logic Architecture)
+    
+    // 1. Lượng hóa sự bùng nổ của nhịp điệu tư duy (Burstiness)
+    function calculateBurstiness(text) {
+        // Phân rã văn bản thành các mệnh đề dựa trên dấu câu
+        const sentences = text.match(/[^.!?]+[.!?]+/g) || [text];
+        if (sentences[0].trim() === "") return 0;
+
+        // Định lượng độ dài (số token) của từng mệnh đề
+        const lengths = sentences.map(s => s.trim().split(/\s+/).length);
+        
+        // Tính toán hạt nhân thống kê: Giá trị trung bình
+        const mean = lengths.reduce((a, b) => a + b, 0) / lengths.length;
+        
+        // Đo lường phương sai (Variance) - Minh chứng cho sự phi tuyến tính
+        const variance = lengths.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / lengths.length;
+        
+        return variance;
+    }
+
+    // 2. Mô phỏng Độ rối rắm (Heuristic Perplexity Simulation)
+    // Trên nền tảng tĩnh (Client-side), ta mô phỏng Perplexity thông qua 
+    // tỷ lệ từ vựng độc bản và sự phức tạp của hình thái từ.
+    function simulatePerplexity(text) {
+        const words = text.toLowerCase().match(/\b\w+\b/g) || [];
+        if (words.length === 0) return 0;
+
+        const uniqueWords = new Set(words).size;
+        const lexicalRichness = uniqueWords / words.length;
+        
+        // Tính độ dài trung bình của từ vựng (phản ánh độ phức tạp khái niệm)
+        const avgWordLength = words.reduce((sum, word) => sum + word.length, 0) / words.length;
+        
+        // Công thức heuristic ánh xạ đặc tính thống kê bề mặt
+        const heuristicPerplexity = (lexicalRichness * 100) + (avgWordLength * 10);
+        return heuristicPerplexity;
+    }
+
+    // 3. Hàm kích hoạt sự thấu hiểu (Execution Function)
+    function analyzeOntology() {
+        const text = document.getElementById('textInput').value.trim();
+        const resultsDiv = document.getElementById('results');
+        
+        if (text.length < 20) {
+            alert("Văn bản quá ngắn để thể hiện một bản thể logic hoàn chỉnh. Hãy suy tư thêm.");
+            return;
+        }
+
+        // Thực thi các phép đo lường
+        const burstiness = calculateBurstiness(text);
+        const perplexity = simulatePerplexity(text);
+
+        // Hiển thị các đại lượng toán học
+        document.getElementById('burstinessValue').innerText = burstiness.toFixed(2);
+        document.getElementById('perplexityValue').innerText = perplexity.toFixed(2);
+
+        // Phân tích và đưa ra luận điểm triết học cho Burstiness
+        const bInsight = document.getElementById('burstinessInsight');
+        if (burstiness > 15) {
+            bInsight.innerText = "Sự dao động dữ dội trong cấu trúc câu. Đây là nhịp điệu ngắt quãng mang đậm dấu ấn của tư duy con người.";
+        } else {
+            bInsight.innerText = "Cấu trúc câu duy trì một sự đều đặn hoàn hảo. Một dấu hiệu đặc trưng của sự hội tụ thống kê từ AI.";
+        }
+
+        // Phân tích và đưa ra luận điểm triết học cho Perplexity
+        const pInsight = document.getElementById('perplexityInsight');
+        if (perplexity > 120) {
+            pInsight.innerText = "Sự lựa chọn từ vựng phức tạp và phi lề thói. Dòng chảy ngôn ngữ này từ chối sự dễ đoán.";
+        } else {
+            pInsight.innerText = "Sự rập khuôn trong hình thái học. Các từ vựng tuân thủ chặt chẽ các giới hạn an toàn của thuật toán dự đoán.";
+        }
+
+        // Hiển thị khung kết quả
+        resultsDiv.style.display = 'block';
+    }
+</script>
+
+</body>
+</html>
