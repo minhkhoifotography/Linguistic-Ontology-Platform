@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lexical Ontology & Refinement Platform</title>
+    <title>Ontological Lexicon & Cognitive Analytics</title>
     <style>
         :root {
             --bg-color: #f4f7f6;
@@ -11,11 +11,11 @@
             --text-main: #2c3e50;
             --text-muted: #7f8c8d;
             --primary: #2980b9;
-            --ai-prob-high: #fadbd8; /* Heavy machine influence (Red) */
-            --ai-prob-med: #fcf3cf;  /* Statistical hesitation (Yellow) */
-            --human-core: #d4efdf;   /* Human existential mark (Green) */
+            --ai-prob-high: #fadbd8; 
+            --human-core: #d4efdf;   
             --border: #e0e6ed;
             --tooltip-bg: #2c3e50;
+            --canvas-line: #27ae60;
         }
 
         body {
@@ -23,12 +23,11 @@
             background-color: var(--bg-color);
             color: var(--text-main);
             margin: 0;
-            padding: 20px;
+            padding: 20px 40px;
             display: flex;
             flex-direction: column;
             align-items: center;
             min-height: 100vh;
-            position: relative;
         }
 
         .header-title { text-align: center; margin-bottom: 30px; }
@@ -38,10 +37,10 @@
         .workspace {
             display: flex;
             width: 100%;
-            max-width: 1200px;
+            max-width: 1300px;
             gap: 20px;
-            height: 60vh;
-            min-height: 500px;
+            height: 50vh;
+            min-height: 400px;
         }
 
         .pane {
@@ -66,31 +65,21 @@
             color: var(--text-muted);
             display: flex;
             justify-content: space-between;
-            align-items: center;
         }
 
-        .editor {
+        .editor, .analysis-canvas {
             flex: 1;
             padding: 20px;
             font-size: 16px;
             line-height: 1.8;
             border: none;
-            resize: none;
             outline: none;
-            font-family: inherit;
-            color: inherit;
             background: transparent;
-        }
-
-        .analysis-canvas {
-            flex: 1;
-            padding: 20px;
-            font-size: 16px;
-            line-height: 1.8;
             overflow-y: auto;
-            white-space: pre-wrap;
-            position: relative;
         }
+        
+        .editor { resize: none; font-family: inherit; color: inherit; }
+        .analysis-canvas { white-space: pre-wrap; position: relative; }
 
         /* Lexical Entities */
         .token {
@@ -100,106 +89,65 @@
             transition: all 0.2s ease;
             display: inline-block;
         }
-        
-        .token:hover {
-            filter: brightness(0.95);
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            transform: translateY(-1px);
-        }
-
+        .token:hover { filter: brightness(0.95); transform: translateY(-1px); }
         .ai-high { background-color: var(--ai-prob-high); border-bottom: 2px solid #e74c3c; }
-        .ai-med { background-color: var(--ai-prob-med); }
         .human { background-color: var(--human-core); }
 
-        .action-bar { width: 100%; max-width: 1200px; margin-top: 20px; display: flex; justify-content: center; }
-        
+        .action-bar { width: 100%; max-width: 1300px; margin-top: 20px; display: flex; justify-content: center; }
         .btn-analyze {
-            padding: 15px 40px;
-            font-size: 16px;
-            background-color: var(--primary);
-            color: white;
-            border: none;
-            border-radius: 30px;
-            cursor: pointer;
-            font-family: inherit;
-            transition: transform 0.2s ease, background-color 0.2s;
-            box-shadow: 0 4px 15px rgba(41, 128, 185, 0.3);
+            padding: 15px 40px; font-size: 16px; background-color: var(--primary); color: white;
+            border: none; border-radius: 30px; cursor: pointer; transition: 0.2s ease;
         }
         .btn-analyze:hover { background-color: #2471a3; transform: translateY(-2px); }
 
-        /* The Synonym Epiphany Board (Tooltip) */
+        /* Analytics Dashboard */
+        .dashboard-container {
+            width: 100%; max-width: 1300px; margin-top: 40px;
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: 8px; padding: 20px; box-sizing: border-box;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+        }
+        .dashboard-header {
+            font-size: 14px; font-weight: bold; text-transform: uppercase;
+            color: var(--text-muted); margin-bottom: 15px; border-bottom: 1px solid var(--border); padding-bottom: 10px;
+        }
+        canvas { width: 100%; height: 200px; background-color: #fafafa; border-radius: 4px; border: 1px dashed #ccc; }
+
+        /* Synonym Tooltip */
         .synonym-board {
-            position: absolute;
-            background-color: var(--tooltip-bg);
-            color: white;
-            border-radius: 6px;
-            padding: 10px 0;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-            z-index: 1000;
-            display: none; /* Hidden until triggered */
-            min-width: 180px;
-            font-family: 'Helvetica Neue', Arial, sans-serif;
-            opacity: 0;
-            transform: translateY(10px);
-            transition: opacity 0.2s ease, transform 0.2s ease;
+            position: absolute; background-color: var(--tooltip-bg); color: white;
+            border-radius: 6px; padding: 10px 0; box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            z-index: 1000; display: none; min-width: 180px; opacity: 0; transition: 0.2s ease;
         }
-
-        .synonym-board.visible {
-            display: block;
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        .synonym-board-header {
-            font-size: 12px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: #bdc3c7;
-            padding: 0 15px 10px 15px;
-            border-bottom: 1px solid #34495e;
-            margin-bottom: 5px;
-        }
-
-        .synonym-item {
-            padding: 8px 15px;
-            font-size: 14px;
-            cursor: pointer;
-            transition: background-color 0.2s;
-            display: block;
-        }
-
+        .synonym-board.visible { display: block; opacity: 1; transform: translateY(0); }
+        .synonym-board-header { font-size: 12px; text-transform: uppercase; color: #bdc3c7; padding: 0 15px 10px; border-bottom: 1px solid #34495e; }
+        .synonym-item { padding: 8px 15px; font-size: 14px; cursor: pointer; display: block; }
         .synonym-item:hover { background-color: #34495e; color: #ecf0f1; }
     </style>
 </head>
 <body>
 
 <div class="header-title">
-    <h1>Linguistic Logic & Ontology</h1>
-    <p>Deconstruct the architecture of text and unearth the statistical echoes of artificial intelligence.</p>
+    <h1>Hermeneutic Logic & Lexical Evolution</h1>
+    <p>Deconstruct machine statistical echoes and observe the trajectory of your philosophical lexicon.</p>
 </div>
 
 <div class="workspace">
     <div class="pane">
-        <div class="pane-header">
-            <span>Original Manuscript</span>
-            <span id="wordCount">0 words</span>
-        </div>
-        <textarea class="editor" id="sourceText" placeholder="Pour your contemplations here. The system will dissect every lexical entity..."></textarea>
+        <div class="pane-header"><span>Original Manuscript</span><span id="wordCount">0 words</span></div>
+        <textarea class="editor" id="sourceText" placeholder="Enter your academic disquisition or logic structures here..."></textarea>
     </div>
-
     <div class="pane">
-        <div class="pane-header">
-            <span>Cognitive Dissection (Detection & Refinement)</span>
-            <span style="font-size: 12px; font-weight: normal;">Red: Machine | Green: Human</span>
-        </div>
-        <div class="analysis-canvas" id="analysisOutput">
-            <span style="color: #999; font-style: italic;">A silent void awaiting the manifestation of data...</span>
-        </div>
+        <div class="pane-header"><span>Ontological Refinement</span><span style="font-size: 12px;">Red: Machine | Green: Human</span></div>
+        <div class="analysis-canvas" id="analysisOutput"><span style="color: #999; font-style: italic;">Awaiting manifestation...</span></div>
     </div>
 </div>
 
-<div class="action-bar">
-    <button class="btn-analyze" onclick="performDeepAnalysis()">Execute Ontological Analysis</button>
+<div class="action-bar"><button class="btn-analyze" onclick="performDeepAnalysis()">Execute Ontological Analysis</button></div>
+
+<div class="dashboard-container">
+    <div class="dashboard-header">Evolution of Independent Thought (Cumulative Human Selections)</div>
+    <canvas id="evolutionChart"></canvas>
 </div>
 
 <div id="synonymBoard" class="synonym-board">
@@ -208,8 +156,7 @@
 </div>
 
 <script>
-    // --- 1. THE DICTIONARY OF TRANSCENDENCE ---
-    // Mapping common statistical AI words to profound philosophical/academic equivalents
+    // --- 1. CORE DICTIONARY & MEMORY ARCHITECTURE ---
     const ontologicalSynonyms = {
         'important': ['pivotal', 'crucial', 'ontologically significant'],
         'moreover': ['furthermore', 'additionally', 'transcending this'],
@@ -217,23 +164,23 @@
         'however': ['nevertheless', 'conversely', 'yet in contrast'],
         'show': ['illustrate', 'manifest', 'elucidate'],
         'use': ['utilize', 'employ', 'leverage'],
-        'clear': ['evident', 'lucid', 'transparent'],
-        'change': ['alteration', 'metamorphosis', 'paradigm shift'],
-        'very': ['profoundly', 'substantially', 'exceedingly']
+        'clear': ['evident', 'lucid', 'transparent']
     };
 
-    let activeTokenElement = null; // Memory state for the currently interrogated token
+    let activeTokenElement = null; 
+    let personalLexicon = JSON.parse(localStorage.getItem('LinguisticOntology_Memory')) || {};
+    let evolutionTimeline = JSON.parse(localStorage.getItem('LinguisticOntology_Timeline')) || [0];
 
-    // --- 2. THE OBSERVER (Event Listeners) ---
+    // Initialize the canvas chart upon creation
+    window.onload = drawChart;
+
+    // --- 2. THE OBSERVER LOGIC ---
     document.getElementById('sourceText').addEventListener('input', function() {
         const text = this.value.trim();
-        const words = text === "" ? 0 : text.split(/\s+/).length;
-        document.getElementById('wordCount').innerText = `${words} words`;
+        document.getElementById('wordCount').innerText = `${text === "" ? 0 : text.split(/\s+/).length} words`;
     });
 
-    // Close the tooltip if clicked outside the realm of tokens
     document.addEventListener('click', function(event) {
-        const board = document.getElementById('synonymBoard');
         if (!event.target.classList.contains('token') && !event.target.closest('#synonymBoard')) {
             hideSynonymBoard();
         }
@@ -243,39 +190,23 @@
     function performDeepAnalysis() {
         const rawText = document.getElementById('sourceText').value.trim();
         const outputCanvas = document.getElementById('analysisOutput');
-        
         if (!rawText) return;
 
-        // Extract entities while preserving the void (spaces)
         const tokens = rawText.match(/(\S+|\s+)/g); 
         if (!tokens) return;
 
         let processedHTML = '';
+        tokens.forEach((token) => {
+            if (/^\s+$/.test(token)) { processedHTML += token; return; }
 
-        tokens.forEach((token, index) => {
-            if (/^\s+$/.test(token)) {
-                processedHTML += token;
-                return;
-            }
-
-            // Stripping the worldly attachments (punctuation) to find the core word
             const cleanWord = token.replace(/[.,!?;()]/g, '').toLowerCase();
             let ontologyClass = '';
             
-            // Heuristics: Detecting the Machine
-            const aiHeavyWords = ['moreover', 'therefore', 'however', 'important', 'show', 'use', 'clear', 'very'];
-            const humanQuirks = ['perhaps', 'maybe', 'feel', 'I', 'we', 'sometimes', 'truly', 'sorrow'];
-
-            if (cleanWord.length > 8) ontologyClass = 'ai-med'; 
-            
+            const aiHeavyWords = ['moreover', 'therefore', 'however', 'important', 'show', 'use', 'clear'];
             if (aiHeavyWords.includes(cleanWord)) ontologyClass = 'ai-high';
-            if (humanQuirks.includes(cleanWord)) ontologyClass = 'human';
+            else if (cleanWord.length > 7) ontologyClass = (Math.random() > 0.5) ? 'ai-high' : '';
 
-            if (!ontologyClass) ontologyClass = Math.random() > 0.7 ? 'ai-med' : '';
-
-            // Manifesting the token into the DOM
             if (ontologyClass) {
-                // We embed the original clean word as a data attribute for fast dictionary lookup
                 processedHTML += `<span class="token ${ontologyClass}" data-word="${cleanWord}" onclick="invokeSynonymBoard(this, event)">${token}</span>`;
             } else {
                 processedHTML += token;
@@ -283,73 +214,135 @@
         });
 
         outputCanvas.innerHTML = processedHTML;
-        hideSynonymBoard(); // Reset UI state
+        hideSynonymBoard(); 
     }
 
-    // --- 4. THE INTERACTIVE LOGIC (Event Delegation & Positioning) ---
+    // --- 4. HERMENEUTIC INTERACTION ---
     function invokeSynonymBoard(element, event) {
-        event.stopPropagation(); // Prevent the document click from immediately hiding the board
+        event.stopPropagation(); 
         activeTokenElement = element;
         const coreWord = element.getAttribute('data-word');
         const board = document.getElementById('synonymBoard');
         const list = document.getElementById('synonymList');
 
-        // Retrieve profound synonyms or provide a structural fallback
-        const synonyms = ontologicalSynonyms[coreWord] || ['reconfigure', 'reconceptualize', 'refine'];
+        let defaultSynonyms = ontologicalSynonyms[coreWord] || ['reconfigure', 'reconceptualize'];
+        let finalSynonyms = [];
 
-        // Construct the list of alternatives
+        if (personalLexicon[coreWord]) {
+            const preferredWord = personalLexicon[coreWord];
+            finalSynonyms.push(`${preferredWord} ✨ (Your Logos)`);
+            defaultSynonyms = defaultSynonyms.filter(syn => syn !== preferredWord);
+        }
+
+        finalSynonyms = finalSynonyms.concat(defaultSynonyms);
         list.innerHTML = '';
-        synonyms.forEach(syn => {
+        
+        finalSynonyms.forEach(syn => {
             const div = document.createElement('div');
             div.className = 'synonym-item';
-            div.innerText = syn;
-            div.onclick = () => applyTransformation(syn);
+            const cleanSyn = syn.replace(' ✨ (Your Logos)', '');
+            
+            if (syn.includes('✨')) {
+                div.innerHTML = `<strong>${cleanSyn}</strong> <span style="color:#f1c40f; font-size:10px;">✨ Ký ức</span>`;
+                div.style.borderLeft = "3px solid #f1c40f"; div.style.paddingLeft = "12px";
+            } else {
+                div.innerText = syn;
+            }
+
+            div.onclick = () => applyTransformation(coreWord, cleanSyn);
             list.appendChild(div);
         });
 
-        // Spatial Mapping: Calculate exact coordinates to float the board above the token
         const rect = element.getBoundingClientRect();
         board.style.left = `${rect.left + window.scrollX}px`;
         board.style.top = `${rect.bottom + window.scrollY + 5}px`;
-        
-        // Manifest the board
         board.classList.add('visible');
     }
 
-    function applyTransformation(newWord) {
+    // --- 5. TRANSMUTATION & TEMPORAL RECORDING ---
+    function applyTransformation(coreWord, newWord) {
         if (!activeTokenElement) return;
 
-        // Preserve original punctuation by extracting it from the raw token
         const originalText = activeTokenElement.innerText;
         const punctuationMatch = originalText.match(/[.,!?;()]+$/);
         const punctuation = punctuationMatch ? punctuationMatch[0] : '';
-        
-        // Check capitalization of the original word to maintain syntactic harmony
         const isCapitalized = /^[A-Z]/.test(originalText);
-        let finalWord = newWord;
-        if (isCapitalized) {
-            finalWord = finalWord.charAt(0).toUpperCase() + finalWord.slice(1);
-        }
+        
+        let finalWord = isCapitalized ? newWord.charAt(0).toUpperCase() + newWord.slice(1) : newWord;
 
-        // Transmute the token
         activeTokenElement.innerText = finalWord + punctuation;
+        activeTokenElement.className = 'token human'; 
         
-        // Cleanse the token of its machine-like aura (remove red highlight, turn it green)
-        activeTokenElement.className = 'token human';
-        
+        // Update Lexical Memory
+        personalLexicon[coreWord] = newWord;
+        localStorage.setItem('LinguisticOntology_Memory', JSON.stringify(personalLexicon));
+
+        // Update Temporal Evolution Timeline
+        let currentScore = evolutionTimeline[evolutionTimeline.length - 1];
+        evolutionTimeline.push(currentScore + 1); // Increment independent thought metric
+        localStorage.setItem('LinguisticOntology_Timeline', JSON.stringify(evolutionTimeline));
+
         hideSynonymBoard();
+        drawChart(); // Redraw the mathematical projection of the soul
     }
 
     function hideSynonymBoard() {
         const board = document.getElementById('synonymBoard');
         board.classList.remove('visible');
-        setTimeout(() => {
-            if (!board.classList.contains('visible')) {
-                board.style.display = 'none';
-            }
-        }, 200); // Wait for the fade-out transition
-        board.style.display = 'block'; // Ensure it can be transitioned
+        setTimeout(() => { if (!board.classList.contains('visible')) board.style.display = 'none'; }, 200); 
+        board.style.display = 'block'; 
     }
+
+    // --- 6. CANVAS RENDERING ENGINE (Raw Data Projection) ---
+    function drawChart() {
+        const canvas = document.getElementById('evolutionChart');
+        const ctx = canvas.getContext('2d');
+        
+        // Match internal coordinate system to physical pixel dimensions
+        canvas.width = canvas.parentElement.clientWidth - 40; 
+        canvas.height = 200;
+        
+        const width = canvas.width;
+        const height = canvas.height;
+        const padding = 20;
+
+        ctx.clearRect(0, 0, width, height);
+
+        const data = evolutionTimeline;
+        if (data.length < 2) return; // Need at least two points to draw a trajectory
+
+        const maxVal = Math.max(...data) || 1; // Prevent division by zero
+        const pointSpacing = (width - padding * 2) / (data.length - 1);
+
+        ctx.beginPath();
+        ctx.strokeStyle = '#27ae60';
+        ctx.lineWidth = 3;
+        ctx.lineJoin = 'round';
+
+        // Plotting the algorithm
+        for (let i = 0; i < data.length; i++) {
+            const x = padding + (i * pointSpacing);
+            const y = height - padding - ((data[i] / maxVal) * (height - padding * 2));
+
+            if (i === 0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+
+        // Adding analytical nodes (dots)
+        ctx.fillStyle = '#2c3e50';
+        for (let i = 0; i < data.length; i++) {
+            const x = padding + (i * pointSpacing);
+            const y = height - padding - ((data[i] / maxVal) * (height - padding * 2));
+            
+            ctx.beginPath();
+            ctx.arc(x, y, 4, 0, Math.PI * 2);
+            ctx.fill();
+        }
+    }
+    
+    // Auto-resize listener to maintain geometric perfection
+    window.addEventListener('resize', drawChart);
 </script>
 
 </body>
