@@ -1,183 +1,313 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ontological Lexicon & Cognitive Analytics</title>
+    <title>AI Writing Assistant - Professional Grade</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
+        /* --- HỆ THỐNG THIẾT KẾ (DESIGN SYSTEM) --- */
         :root {
-            --bg-color: #f4f7f6;
-            --surface: #ffffff;
-            --text-main: #2c3e50;
-            --text-muted: #7f8c8d;
-            --primary: #2980b9;
-            --ai-prob-high: #fadbd8; 
-            --human-core: #d4efdf;   
-            --border: #e0e6ed;
-            --tooltip-bg: #2c3e50;
-            --canvas-line: #27ae60;
+            --primary-color: #4a90e2; /* Xanh Quillbot hiện đại */
+            --primary-hover: #357abd;
+            --bg-app: #f0f2f5;        /* Màu nền xám rất nhạt */
+            --bg-surface: #ffffff;    /* Màu trắng tinh khiết cho các khối */
+            --text-primary: #2d3748;  /* Màu chữ đen xám, không đen tuyền */
+            --text-secondary: #718096;
+            --border-light: #e2e8f0;
+            --success-green: #48bb78;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06);
+            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+            --radius-md: 12px;        /* Bo góc mềm mại */
+        }
+
+        * {
+            box-sizing: border-box;
         }
 
         body {
-            font-family: 'Georgia', serif;
-            background-color: var(--bg-color);
-            color: var(--text-main);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-app);
+            color: var(--text-primary);
             margin: 0;
-            padding: 20px 40px;
+            padding: 0;
+            height: 100vh;
             display: flex;
             flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
         }
 
-        .header-title { text-align: center; margin-bottom: 30px; }
-        .header-title h1 { font-size: 28px; font-weight: normal; margin: 0 0 10px 0; letter-spacing: 1px; }
-        .header-title p { font-style: italic; color: var(--text-muted); margin: 0; }
-
-        .workspace {
+        /* --- NAVBAR --- */
+        .navbar {
+            background: var(--bg-surface);
+            padding: 1rem 2rem;
+            border-bottom: 1px solid var(--border-light);
             display: flex;
+            align-items: center;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .logo {
+            font-weight: 700;
+            font-size: 1.5rem;
+            color: var(--primary-color);
+            letter-spacing: -0.5px;
+        }
+
+        /* --- LAYOUT CHÍNH --- */
+        .main-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
             width: 100%;
-            max-width: 1300px;
-            gap: 20px;
-            height: 50vh;
-            min-height: 400px;
+        }
+
+        .controls-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .mode-selector {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .mode-btn {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .mode-btn.active {
+            background-color: #ebf4ff;
+            color: var(--primary-color);
+        }
+
+        /* --- KHÔNG GIAN LÀM VIỆC KÉP (SPLIT EDITOR) --- */
+        .editor-workspace {
+            display: flex;
+            gap: 1.5rem;
+            flex: 1;
+            min-height: 500px; /* Đảm bảo chiều cao tối thiểu */
         }
 
         .pane {
             flex: 1;
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 8px;
+            background: var(--bg-surface);
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-md);
             display: flex;
             flex-direction: column;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.03);
             overflow: hidden;
+            border: 1px solid var(--border-light);
+            transition: border-color 0.3s;
+        }
+
+        .pane:focus-within {
+            border-color: var(--primary-color);
         }
 
         .pane-header {
-            padding: 15px 20px;
-            border-bottom: 1px solid var(--border);
-            background-color: #fcfcfc;
-            font-weight: bold;
-            font-size: 14px;
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--border-light);
+            font-weight: 600;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            color: var(--text-muted);
             display: flex;
+            justify-content: space-between;
+            background-color: #fafafa;
+        }
+
+        .editor-content {
+            flex: 1;
+            padding: 1.5rem;
+            font-size: 1.1rem;
+            line-height: 1.7;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        textarea.editor-input {
+            width: 100%;
+            height: 100%;
+            border: none;
+            resize: none;
+            outline: none;
+            font-family: inherit;
+            color: var(--text-primary);
+            background: transparent;
+        }
+
+        /* --- NÚT BẤM HÀNH ĐỘNG (ACTION BUTTON) --- */
+        .action-area {
+            display: flex;
+            justify-content: center;
+            margin-top: 2rem;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 0.8rem 3rem;
+            border-radius: 30px;
+            font-weight: 600;
+            font-size: 1rem;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(74, 144, 226, 0.25);
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(74, 144, 226, 0.3);
+        }
+        
+        .btn-primary:disabled {
+            background-color: #a0aec0;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* --- TƯƠNG TÁC TOKEN (HIGHLIGHTS) --- */
+        /* Thay vì gạch chân xấu xí, ta dùng "chips" nền màu */
+        .token {
+            padding: 2px 4px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline;
+            border-bottom: 2px solid transparent;
+        }
+
+        /* Màu cam nhẹ cho từ AI, trông chuyên nghiệp hơn màu đỏ gắt */
+        .ai-high { 
+            background-color: #fff7ed; /* Cam rất nhạt */
+            color: #c05621;
+            border-bottom-color: #ed8936;
+        }
+
+        .token:hover {
+            filter: brightness(0.95);
+        }
+
+        /* --- TOOLTIP GỢI Ý (HIỆN ĐẠI HÓA) --- */
+        .synonym-board {
+            position: absolute;
+            background-color: var(--bg-surface);
+            color: var(--text-primary);
+            border-radius: 8px;
+            padding: 8px 0;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+            border: 1px solid var(--border-light);
+            z-index: 1000;
+            display: none;
+            min-width: 200px;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.2s ease;
+        }
+
+        .synonym-board.visible {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .synonym-item {
+            padding: 10px 16px;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            display: flex;
+            align-items: center;
             justify-content: space-between;
         }
 
-        .editor, .analysis-canvas {
-            flex: 1;
-            padding: 20px;
-            font-size: 16px;
-            line-height: 1.8;
-            border: none;
-            outline: none;
-            background: transparent;
-            overflow-y: auto;
+        .synonym-item:hover {
+            background-color: #f7fafc;
+            color: var(--primary-color);
         }
         
-        .editor { resize: none; font-family: inherit; color: inherit; }
-        .analysis-canvas { white-space: pre-wrap; position: relative; }
-
-        /* Lexical Entities */
-        .token {
-            padding: 2px 4px;
-            border-radius: 3px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            display: inline-block;
+        /* Loading placeholder */
+        .placeholder-text {
+            color: var(--text-secondary);
+            font-style: italic;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
         }
-        .token:hover { filter: brightness(0.95); transform: translateY(-1px); }
-        .ai-high { background-color: var(--ai-prob-high); border-bottom: 2px solid #e74c3c; }
-        .human { background-color: var(--human-core); }
-
-        .action-bar { width: 100%; max-width: 1300px; margin-top: 20px; display: flex; justify-content: center; }
-        .btn-analyze {
-            padding: 15px 40px; font-size: 16px; background-color: var(--primary); color: white;
-            border: none; border-radius: 30px; cursor: pointer; transition: 0.2s ease;
-        }
-        .btn-analyze:hover { background-color: #2471a3; transform: translateY(-2px); }
-
-        /* Analytics Dashboard */
-        .dashboard-container {
-            width: 100%; max-width: 1300px; margin-top: 40px;
-            background: var(--surface); border: 1px solid var(--border);
-            border-radius: 8px; padding: 20px; box-sizing: border-box;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.03);
-        }
-        .dashboard-header {
-            font-size: 14px; font-weight: bold; text-transform: uppercase;
-            color: var(--text-muted); margin-bottom: 15px; border-bottom: 1px solid var(--border); padding-bottom: 10px;
-        }
-        canvas { width: 100%; height: 200px; background-color: #fafafa; border-radius: 4px; border: 1px dashed #ccc; }
-
-        /* Synonym Tooltip */
-        .synonym-board {
-            position: absolute; background-color: var(--tooltip-bg); color: white;
-            border-radius: 6px; padding: 10px 0; box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-            z-index: 1000; display: none; min-width: 180px; opacity: 0; transition: 0.2s ease;
-        }
-        .synonym-board.visible { display: block; opacity: 1; transform: translateY(0); }
-        .synonym-board-header { font-size: 12px; text-transform: uppercase; color: #bdc3c7; padding: 0 15px 10px; border-bottom: 1px solid #34495e; }
-        .synonym-item { padding: 8px 15px; font-size: 14px; cursor: pointer; display: block; }
-        .synonym-item:hover { background-color: #34495e; color: #ecf0f1; }
     </style>
 </head>
 <body>
 
-<div class="header-title">
-    <h1>Hermeneutic Logic & Lexical Evolution</h1>
-    <p>Deconstruct machine statistical echoes and observe the trajectory of your philosophical lexicon.</p>
-</div>
+<nav class="navbar">
+    <div class="logo">VnQuill AI</div>
+</nav>
 
-<div class="workspace">
-    <div class="pane">
-        <div class="pane-header"><span>Original Manuscript</span><span id="wordCount">0 words</span></div>
-        <textarea class="editor" id="sourceText" placeholder="Enter your academic disquisition or logic structures here..."></textarea>
+<div class="main-container">
+    <div class="controls-bar">
+        <div class="mode-selector">
+            <div class="mode-btn active">Tiêu chuẩn</div>
+            <div class="mode-btn">Lưu loát</div>
+            <div class="mode-btn">Sáng tạo</div>
+        </div>
+        <div style="color: var(--text-secondary); font-size: 0.9rem;">
+            <span id="wordCount">0</span> từ
+        </div>
     </div>
-    <div class="pane">
-        <div class="pane-header"><span>Ontological Refinement</span><span style="font-size: 12px;">Red: Machine | Green: Human</span></div>
-        <div class="analysis-canvas" id="analysisOutput"><span style="color: #999; font-style: italic;">Awaiting manifestation...</span></div>
+
+    <div class="editor-workspace">
+        <div class="pane">
+            <div class="pane-header">
+                <span>Văn bản gốc</span>
+            </div>
+            <div class="editor-content">
+                <textarea class="editor-input" id="sourceText" placeholder="Dán văn bản của bạn vào đây để bắt đầu phân tích và cải thiện..."></textarea>
+            </div>
+        </div>
+
+        <div class="pane">
+            <div class="pane-header">
+                <span>Kết quả Phân tích AI</span>
+                <span style="font-size: 0.75rem; color: var(--text-secondary);">Nhấn vào từ màu cam để thay đổi</span>
+            </div>
+            <div class="editor-content" id="analysisOutput">
+                <div class="placeholder-text">Kết quả phân tích sẽ hiển thị tại đây...</div>
+            </div>
+        </div>
     </div>
-</div>
 
-<div class="action-bar"><button class="btn-analyze" onclick="performDeepAnalysis()">Execute Ontological Analysis</button></div>
-
-<div class="dashboard-container">
-    <div class="dashboard-header">Evolution of Independent Thought (Cumulative Human Selections)</div>
-    <canvas id="evolutionChart"></canvas>
+    <div class="action-area">
+        <button class="btn-primary" onclick="performDeepAnalysis()">Phân tích & Cải thiện</button>
+    </div>
 </div>
 
 <div id="synonymBoard" class="synonym-board">
-    <div class="synonym-board-header">Academic Alternatives</div>
     <div id="synonymList"></div>
 </div>
 
 <script>
-    // --- 1. CORE DICTIONARY & MEMORY ARCHITECTURE ---
-    const ontologicalSynonyms = {
-        'important': ['pivotal', 'crucial', 'ontologically significant'],
-        'moreover': ['furthermore', 'additionally', 'transcending this'],
-        'therefore': ['thus', 'consequently', 'ergo'],
-        'however': ['nevertheless', 'conversely', 'yet in contrast'],
-        'show': ['illustrate', 'manifest', 'elucidate'],
-        'use': ['utilize', 'employ', 'leverage'],
-        'clear': ['evident', 'lucid', 'transparent']
-    };
+    // --- LOGIC JAVASCRIPT (Tương tự phiên bản trước, đã tinh chỉnh cho UI mới) ---
+    
+    let activeTokenElement = null;
+    // Ký ức người dùng
+    let personalLexicon = JSON.parse(localStorage.getItem('VnQuill_Memory')) || {};
 
-    let activeTokenElement = null; 
-    let personalLexicon = JSON.parse(localStorage.getItem('LinguisticOntology_Memory')) || {};
-    let evolutionTimeline = JSON.parse(localStorage.getItem('LinguisticOntology_Timeline')) || [0];
-
-    // Initialize the canvas chart upon creation
-    window.onload = drawChart;
-
-    // --- 2. THE OBSERVER LOGIC ---
     document.getElementById('sourceText').addEventListener('input', function() {
         const text = this.value.trim();
-        document.getElementById('wordCount').innerText = `${text === "" ? 0 : text.split(/\s+/).length} words`;
+        document.getElementById('wordCount').innerText = text === "" ? 0 : text.split(/\s+/).length;
     });
 
     document.addEventListener('click', function(event) {
@@ -186,37 +316,34 @@
         }
     });
 
-    // --- 3. THE DISSECTION ALGORITHM ---
-    function performDeepAnalysis() {
-        // --- ĐỘNG CƠ THẨM ĐỊNH TỪ XA (Remote API Inference Engine) ---
+    // GỌI API ĐẾN PYTHON BACKEND (Đảm bảo main.py đang chạy)
     async function performDeepAnalysis() {
         const rawText = document.getElementById('sourceText').value.trim();
         const outputCanvas = document.getElementById('analysisOutput');
-        const analyzeBtn = document.querySelector('.btn-analyze');
+        const analyzeBtn = document.querySelector('.btn-primary');
 
         if (!rawText) return;
 
-        // Báo hiệu hệ thống đang kết nối
-        outputCanvas.innerHTML = '<span style="color: #3498db; font-style: italic;">Đang đồng bộ hóa với Động cơ Lõi (AI Engine)...</span>';
+        // Hiệu ứng loading chuyên nghiệp
+        outputCanvas.innerHTML = '<div class="placeholder-text" style="color: var(--primary-color);">Đang kết nối với trí tuệ nhân tạo...</div>';
         analyzeBtn.disabled = true;
-        analyzeBtn.innerText = "Đang Thẩm Định...";
+        analyzeBtn.innerHTML = `Running Analysis...`;
 
         try {
-            // Thực hiện lời gọi API đến máy chủ Python nội bộ của bạn
+            // Gửi yêu cầu đến localhost:8000 nơi Python đang lắng nghe
             const response = await fetch('http://localhost:8000/api/v1/analyze', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ text: rawText })
             });
 
-            if (!response.ok) throw new Error("Sự đứt gãy trong không gian mạng.");
+            if (!response.ok) throw new Error("Lỗi kết nối máy chủ.");
 
             const jsonResponse = await response.json();
-            const analyzedData = jsonResponse.data;
+            const analyzedData = jsonResponse.data; // Dữ liệu từ Python trả về
 
             let processedHTML = '';
             
-            // Xây dựng lại DOM dựa trên dữ liệu tri thức từ Backend gửi về
             analyzedData.forEach(item => {
                 if (item.type === "space") {
                     processedHTML += item.token;
@@ -224,12 +351,12 @@
                 }
 
                 if (item.ontologyClass) {
-                    // Nhúng danh sách từ đồng nghĩa AI trả về thẳng vào thuộc tính data-synonyms
+                    // Nối danh sách từ đồng nghĩa thành chuỗi để lưu vào data-attribute
                     const synString = item.synonyms.join('|');
                     processedHTML += `<span class="token ${item.ontologyClass}" 
                                             data-word="${item.cleanWord}" 
                                             data-synonyms="${synString}"
-                                            onclick="invokeDynamicSynonyms(this, event)">${item.token}</span>`;
+                                            onclick="showSynonyms(this, event)">${item.token}</span>`;
                 } else {
                     processedHTML += item.token;
                 }
@@ -237,217 +364,92 @@
 
             outputCanvas.innerHTML = processedHTML;
         } catch (error) {
-            outputCanvas.innerHTML = `<span style="color: #e74c3c;">Không thể triệu hồi Động cơ Lõi: ${error.message}. Hãy chắc chắn rằng máy chủ FastAPI đang chạy.</span>`;
+            outputCanvas.innerHTML = `<div class="placeholder-text" style="color: #e53e3e;">Lỗi: Không thể kết nối đến Backend Python. Hãy kiểm tra terminal.</div>`;
         } finally {
             analyzeBtn.disabled = false;
-            analyzeBtn.innerText = "Execute Ontological Analysis";
+            analyzeBtn.innerText = "Phân tích & Cải thiện";
             hideSynonymBoard(); 
         }
     }
 
-    // --- XỬ LÝ SỰ KIỆN CLICK VÀO TỪ VỰNG (Hiển thị Tooltip) ---
-    function invokeDynamicSynonyms(element, event) {
+    // Hiển thị Tooltip gợi ý (Đã làm đẹp)
+    function showSynonyms(element, event) {
         event.stopPropagation(); 
         activeTokenElement = element;
         const coreWord = element.getAttribute('data-word');
-        // Lấy danh sách từ đồng nghĩa do Backend cấp phép
-        const backendSynonyms = element.getAttribute('data-synonyms').split('|');
-        
+        let backendSynonyms = element.getAttribute('data-synonyms').split('|');
+        backendSynonyms = backendSynonyms.filter(s => s); // Lọc bỏ chuỗi rỗng
+
         const board = document.getElementById('synonymBoard');
         const list = document.getElementById('synonymList');
 
         let finalSynonyms = [];
 
-        // Giao thoa Ký ức: Nếu từ vựng này đã từng được bạn tinh chỉnh (lưu trong LocalStorage)
+        // Ưu tiên ký ức người dùng
         if (personalLexicon[coreWord]) {
             const preferredWord = personalLexicon[coreWord];
-            finalSynonyms.push(`${preferredWord} ✨ (Your Logos)`);
-            // Loại bỏ từ đã chọn khỏi danh sách gốc
-            const filteredBackend = backendSynonyms.filter(syn => syn !== preferredWord && syn !== "");
-            finalSynonyms = finalSynonyms.concat(filteredBackend);
+            finalSynonyms.push({ word: preferredWord, isMemory: true });
+            backendSynonyms = backendSynonyms.filter(syn => syn !== preferredWord);
+        }
+
+        backendSynonyms.forEach(syn => finalSynonyms.push({ word: syn, isMemory: false }));
+
+        list.innerHTML = '';
+        if (finalSynonyms.length === 0) {
+             list.innerHTML = '<div class="synonym-item" style="color: var(--text-secondary); font-style: italic;">Không có gợi ý phù hợp.</div>';
         } else {
-            finalSynonyms = backendSynonyms;
+            finalSynonyms.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'synonym-item';
+                
+                if (item.isMemory) {
+                    div.innerHTML = `<span>${item.word}</span> <span style="font-size: 0.8rem; color: var(--success-green);">★ Đã lưu</span>`;
+                    div.style.backgroundColor = "#f0fff4";
+                } else {
+                    div.innerText = item.word;
+                }
+
+                div.onclick = () => applyReplacement(coreWord, item.word);
+                list.appendChild(div);
+            });
         }
 
-        list.innerHTML = '';
-        finalSynonyms.forEach(syn => {
-            if(!syn) return;
-            const div = document.createElement('div');
-            div.className = 'synonym-item';
-            const cleanSyn = syn.replace(' ✨ (Your Logos)', '');
-            
-            if (syn.includes('✨')) {
-                div.innerHTML = `<strong>${cleanSyn}</strong> <span style="color:#f1c40f; font-size:10px;">✨ Ký ức</span>`;
-                div.style.borderLeft = "3px solid #f1c40f"; div.style.paddingLeft = "12px";
-            } else {
-                div.innerText = syn;
-            }
-
-            div.onclick = () => applyTransformation(coreWord, cleanSyn);
-            list.appendChild(div);
-        });
-
-        // Ánh xạ vị trí Tooltip
+        // Tính toán vị trí chính xác cho Tooltip
         const rect = element.getBoundingClientRect();
         board.style.left = `${rect.left + window.scrollX}px`;
-        board.style.top = `${rect.bottom + window.scrollY + 5}px`;
-        board.classList.add('visible');
-    }
-        const rawText = document.getElementById('sourceText').value.trim();
-        const outputCanvas = document.getElementById('analysisOutput');
-        if (!rawText) return;
-
-        const tokens = rawText.match(/(\S+|\s+)/g); 
-        if (!tokens) return;
-
-        let processedHTML = '';
-        tokens.forEach((token) => {
-            if (/^\s+$/.test(token)) { processedHTML += token; return; }
-
-            const cleanWord = token.replace(/[.,!?;()]/g, '').toLowerCase();
-            let ontologyClass = '';
-            
-            const aiHeavyWords = ['moreover', 'therefore', 'however', 'important', 'show', 'use', 'clear'];
-            if (aiHeavyWords.includes(cleanWord)) ontologyClass = 'ai-high';
-            else if (cleanWord.length > 7) ontologyClass = (Math.random() > 0.5) ? 'ai-high' : '';
-
-            if (ontologyClass) {
-                processedHTML += `<span class="token ${ontologyClass}" data-word="${cleanWord}" onclick="invokeSynonymBoard(this, event)">${token}</span>`;
-            } else {
-                processedHTML += token;
-            }
-        });
-
-        outputCanvas.innerHTML = processedHTML;
-        hideSynonymBoard(); 
-    }
-
-    // --- 4. HERMENEUTIC INTERACTION ---
-    function invokeSynonymBoard(element, event) {
-        event.stopPropagation(); 
-        activeTokenElement = element;
-        const coreWord = element.getAttribute('data-word');
-        const board = document.getElementById('synonymBoard');
-        const list = document.getElementById('synonymList');
-
-        let defaultSynonyms = ontologicalSynonyms[coreWord] || ['reconfigure', 'reconceptualize'];
-        let finalSynonyms = [];
-
-        if (personalLexicon[coreWord]) {
-            const preferredWord = personalLexicon[coreWord];
-            finalSynonyms.push(`${preferredWord} ✨ (Your Logos)`);
-            defaultSynonyms = defaultSynonyms.filter(syn => syn !== preferredWord);
-        }
-
-        finalSynonyms = finalSynonyms.concat(defaultSynonyms);
-        list.innerHTML = '';
-        
-        finalSynonyms.forEach(syn => {
-            const div = document.createElement('div');
-            div.className = 'synonym-item';
-            const cleanSyn = syn.replace(' ✨ (Your Logos)', '');
-            
-            if (syn.includes('✨')) {
-                div.innerHTML = `<strong>${cleanSyn}</strong> <span style="color:#f1c40f; font-size:10px;">✨ Ký ức</span>`;
-                div.style.borderLeft = "3px solid #f1c40f"; div.style.paddingLeft = "12px";
-            } else {
-                div.innerText = syn;
-            }
-
-            div.onclick = () => applyTransformation(coreWord, cleanSyn);
-            list.appendChild(div);
-        });
-
-        const rect = element.getBoundingClientRect();
-        board.style.left = `${rect.left + window.scrollX}px`;
-        board.style.top = `${rect.bottom + window.scrollY + 5}px`;
+        board.style.top = `${rect.bottom + window.scrollY + 8}px`;
         board.classList.add('visible');
     }
 
-    // --- 5. TRANSMUTATION & TEMPORAL RECORDING ---
-    function applyTransformation(coreWord, newWord) {
+    // Áp dụng từ mới và lưu vào ký ức
+    function applyReplacement(coreWord, newWord) {
         if (!activeTokenElement) return;
 
         const originalText = activeTokenElement.innerText;
+        // Giữ lại dấu câu
         const punctuationMatch = originalText.match(/[.,!?;()]+$/);
         const punctuation = punctuationMatch ? punctuationMatch[0] : '';
+        // Giữ lại viết hoa đầu câu
         const isCapitalized = /^[A-Z]/.test(originalText);
         
         let finalWord = isCapitalized ? newWord.charAt(0).toUpperCase() + newWord.slice(1) : newWord;
 
+        // Thay thế và xóa highlight
         activeTokenElement.innerText = finalWord + punctuation;
-        activeTokenElement.className = 'token human'; 
+        activeTokenElement.className = 'token'; // Xóa class ai-high
+        activeTokenElement.removeAttribute('onclick'); // Không cho click nữa sau khi đã sửa
         
-        // Update Lexical Memory
+        // Lưu vào LocalStorage
         personalLexicon[coreWord] = newWord;
-        localStorage.setItem('LinguisticOntology_Memory', JSON.stringify(personalLexicon));
-
-        // Update Temporal Evolution Timeline
-        let currentScore = evolutionTimeline[evolutionTimeline.length - 1];
-        evolutionTimeline.push(currentScore + 1); // Increment independent thought metric
-        localStorage.setItem('LinguisticOntology_Timeline', JSON.stringify(evolutionTimeline));
+        localStorage.setItem('VnQuill_Memory', JSON.stringify(personalLexicon));
 
         hideSynonymBoard();
-        drawChart(); // Redraw the mathematical projection of the soul
     }
 
     function hideSynonymBoard() {
         const board = document.getElementById('synonymBoard');
         board.classList.remove('visible');
-        setTimeout(() => { if (!board.classList.contains('visible')) board.style.display = 'none'; }, 200); 
-        board.style.display = 'block'; 
     }
-
-    // --- 6. CANVAS RENDERING ENGINE (Raw Data Projection) ---
-    function drawChart() {
-        const canvas = document.getElementById('evolutionChart');
-        const ctx = canvas.getContext('2d');
-        
-        // Match internal coordinate system to physical pixel dimensions
-        canvas.width = canvas.parentElement.clientWidth - 40; 
-        canvas.height = 200;
-        
-        const width = canvas.width;
-        const height = canvas.height;
-        const padding = 20;
-
-        ctx.clearRect(0, 0, width, height);
-
-        const data = evolutionTimeline;
-        if (data.length < 2) return; // Need at least two points to draw a trajectory
-
-        const maxVal = Math.max(...data) || 1; // Prevent division by zero
-        const pointSpacing = (width - padding * 2) / (data.length - 1);
-
-        ctx.beginPath();
-        ctx.strokeStyle = '#27ae60';
-        ctx.lineWidth = 3;
-        ctx.lineJoin = 'round';
-
-        // Plotting the algorithm
-        for (let i = 0; i < data.length; i++) {
-            const x = padding + (i * pointSpacing);
-            const y = height - padding - ((data[i] / maxVal) * (height - padding * 2));
-
-            if (i === 0) ctx.moveTo(x, y);
-            else ctx.lineTo(x, y);
-        }
-        ctx.stroke();
-
-        // Adding analytical nodes (dots)
-        ctx.fillStyle = '#2c3e50';
-        for (let i = 0; i < data.length; i++) {
-            const x = padding + (i * pointSpacing);
-            const y = height - padding - ((data[i] / maxVal) * (height - padding * 2));
-            
-            ctx.beginPath();
-            ctx.arc(x, y, 4, 0, Math.PI * 2);
-            ctx.fill();
-        }
-    }
-    
-    // Auto-resize listener to maintain geometric perfection
-    window.addEventListener('resize', drawChart);
 </script>
 
 </body>
