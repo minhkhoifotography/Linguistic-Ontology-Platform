@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nền tảng Tinh lọc & Thẩm định Ngôn từ</title>
+    <title>Lexical Ontology & Refinement Platform</title>
     <style>
         :root {
             --bg-color: #f4f7f6;
@@ -11,10 +11,11 @@
             --text-main: #2c3e50;
             --text-muted: #7f8c8d;
             --primary: #2980b9;
-            --ai-prob-high: #fadbd8; /* Sắc đỏ nhạt cho từ vựng nặng tính máy móc */
-            --ai-prob-med: #fcf3cf;  /* Sắc vàng cho sự lưỡng lự */
-            --human-core: #d4efdf;   /* Sắc xanh cho tính người nguyên bản */
+            --ai-prob-high: #fadbd8; /* Heavy machine influence (Red) */
+            --ai-prob-med: #fcf3cf;  /* Statistical hesitation (Yellow) */
+            --human-core: #d4efdf;   /* Human existential mark (Green) */
             --border: #e0e6ed;
+            --tooltip-bg: #2c3e50;
         }
 
         body {
@@ -27,27 +28,13 @@
             flex-direction: column;
             align-items: center;
             min-height: 100vh;
+            position: relative;
         }
 
-        .header-title {
-            text-align: center;
-            margin-bottom: 30px;
-        }
+        .header-title { text-align: center; margin-bottom: 30px; }
+        .header-title h1 { font-size: 28px; font-weight: normal; margin: 0 0 10px 0; letter-spacing: 1px; }
+        .header-title p { font-style: italic; color: var(--text-muted); margin: 0; }
 
-        .header-title h1 {
-            font-size: 28px;
-            font-weight: normal;
-            margin: 0 0 10px 0;
-            letter-spacing: 1px;
-        }
-
-        .header-title p {
-            font-style: italic;
-            color: var(--text-muted);
-            margin: 0;
-        }
-
-        /* Kiến trúc Không gian Nhị nguyên */
         .workspace {
             display: flex;
             width: 100%;
@@ -95,7 +82,6 @@
             background: transparent;
         }
 
-        /* Không gian hiển thị kết quả phân rã */
         .analysis-canvas {
             flex: 1;
             padding: 20px;
@@ -103,32 +89,30 @@
             line-height: 1.8;
             overflow-y: auto;
             white-space: pre-wrap;
+            position: relative;
         }
 
-        /* Thể hiện Bản thể qua màu sắc */
+        /* Lexical Entities */
         .token {
-            padding: 2px 0;
+            padding: 2px 4px;
             border-radius: 3px;
             cursor: pointer;
-            transition: background-color 0.2s ease;
+            transition: all 0.2s ease;
+            display: inline-block;
         }
         
         .token:hover {
             filter: brightness(0.95);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transform: translateY(-1px);
         }
 
-        .ai-high { background-color: var(--ai-prob-high); }
+        .ai-high { background-color: var(--ai-prob-high); border-bottom: 2px solid #e74c3c; }
         .ai-med { background-color: var(--ai-prob-med); }
         .human { background-color: var(--human-core); }
 
-        .action-bar {
-            width: 100%;
-            max-width: 1200px;
-            margin-top: 20px;
-            display: flex;
-            justify-content: center;
-        }
-
+        .action-bar { width: 100%; max-width: 1200px; margin-top: 20px; display: flex; justify-content: center; }
+        
         .btn-analyze {
             padding: 15px 40px;
             font-size: 16px;
@@ -141,113 +125,230 @@
             transition: transform 0.2s ease, background-color 0.2s;
             box-shadow: 0 4px 15px rgba(41, 128, 185, 0.3);
         }
+        .btn-analyze:hover { background-color: #2471a3; transform: translateY(-2px); }
 
-        .btn-analyze:hover {
-            background-color: #2471a3;
-            transform: translateY(-2px);
+        /* The Synonym Epiphany Board (Tooltip) */
+        .synonym-board {
+            position: absolute;
+            background-color: var(--tooltip-bg);
+            color: white;
+            border-radius: 6px;
+            padding: 10px 0;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            z-index: 1000;
+            display: none; /* Hidden until triggered */
+            min-width: 180px;
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: opacity 0.2s ease, transform 0.2s ease;
         }
+
+        .synonym-board.visible {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .synonym-board-header {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #bdc3c7;
+            padding: 0 15px 10px 15px;
+            border-bottom: 1px solid #34495e;
+            margin-bottom: 5px;
+        }
+
+        .synonym-item {
+            padding: 8px 15px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            display: block;
+        }
+
+        .synonym-item:hover { background-color: #34495e; color: #ecf0f1; }
     </style>
 </head>
 <body>
 
 <div class="header-title">
     <h1>Linguistic Logic & Ontology</h1>
-    <p>Giải phẫu cấu trúc văn bản và khai phá dấu ấn của trí tuệ nhân tạo.</p>
+    <p>Deconstruct the architecture of text and unearth the statistical echoes of artificial intelligence.</p>
 </div>
-
-
 
 <div class="workspace">
     <div class="pane">
         <div class="pane-header">
-            <span>Bản Thảo Nguyên Thủy</span>
-            <span id="wordCount">0 từ</span>
+            <span>Original Manuscript</span>
+            <span id="wordCount">0 words</span>
         </div>
-        <textarea class="editor" id="sourceText" placeholder="Hãy nhập đoạn tiểu luận hoặc mã nguồn kèm bình luận của bạn vào đây. Hệ thống sẽ bóc tách từng hạt nhân ngôn ngữ..."></textarea>
+        <textarea class="editor" id="sourceText" placeholder="Pour your contemplations here. The system will dissect every lexical entity..."></textarea>
     </div>
 
     <div class="pane">
         <div class="pane-header">
-            <span>Giải Phẫu Nhận Thức (AI Detection & Refinement)</span>
-            <span style="font-size: 12px;">Đỏ: Máy móc | Xanh: Con người</span>
+            <span>Cognitive Dissection (Detection & Refinement)</span>
+            <span style="font-size: 12px; font-weight: normal;">Red: Machine | Green: Human</span>
         </div>
         <div class="analysis-canvas" id="analysisOutput">
-            <span style="color: #999; font-style: italic;">Không gian tĩnh lặng chờ đợi sự hiển lộ của dữ liệu...</span>
+            <span style="color: #999; font-style: italic;">A silent void awaiting the manifestation of data...</span>
         </div>
     </div>
 </div>
 
 <div class="action-bar">
-    <button class="btn-analyze" onclick="performDeepAnalysis()">Tiến Hành Thẩm Định</button>
+    <button class="btn-analyze" onclick="performDeepAnalysis()">Execute Ontological Analysis</button>
+</div>
+
+<div id="synonymBoard" class="synonym-board">
+    <div class="synonym-board-header">Academic Alternatives</div>
+    <div id="synonymList"></div>
 </div>
 
 <script>
-    // Kiến trúc Logic Vi mô (Micro-level Logic Architecture)
-    
+    // --- 1. THE DICTIONARY OF TRANSCENDENCE ---
+    // Mapping common statistical AI words to profound philosophical/academic equivalents
+    const ontologicalSynonyms = {
+        'important': ['pivotal', 'crucial', 'ontologically significant'],
+        'moreover': ['furthermore', 'additionally', 'transcending this'],
+        'therefore': ['thus', 'consequently', 'ergo'],
+        'however': ['nevertheless', 'conversely', 'yet in contrast'],
+        'show': ['illustrate', 'manifest', 'elucidate'],
+        'use': ['utilize', 'employ', 'leverage'],
+        'clear': ['evident', 'lucid', 'transparent'],
+        'change': ['alteration', 'metamorphosis', 'paradigm shift'],
+        'very': ['profoundly', 'substantially', 'exceedingly']
+    };
+
+    let activeTokenElement = null; // Memory state for the currently interrogated token
+
+    // --- 2. THE OBSERVER (Event Listeners) ---
     document.getElementById('sourceText').addEventListener('input', function() {
         const text = this.value.trim();
         const words = text === "" ? 0 : text.split(/\s+/).length;
-        document.getElementById('wordCount').innerText = `${words} từ`;
+        document.getElementById('wordCount').innerText = `${words} words`;
     });
 
+    // Close the tooltip if clicked outside the realm of tokens
+    document.addEventListener('click', function(event) {
+        const board = document.getElementById('synonymBoard');
+        if (!event.target.classList.contains('token') && !event.target.closest('#synonymBoard')) {
+            hideSynonymBoard();
+        }
+    });
+
+    // --- 3. THE DISSECTION ALGORITHM ---
     function performDeepAnalysis() {
         const rawText = document.getElementById('sourceText').value.trim();
         const outputCanvas = document.getElementById('analysisOutput');
         
         if (!rawText) return;
 
-        // Phân rã văn bản thành mảng các từ vựng và khoảng trắng (bảo toàn cấu trúc)
-        // Regex bóc tách từ vựng nhưng giữ lại dấu câu đi kèm
+        // Extract entities while preserving the void (spaces)
         const tokens = rawText.match(/(\S+|\s+)/g); 
-        
         if (!tokens) return;
 
         let processedHTML = '';
 
-        tokens.forEach(token => {
-            // Giữ nguyên khoảng trắng và ký tự ngắt dòng
+        tokens.forEach((token, index) => {
             if (/^\s+$/.test(token)) {
                 processedHTML += token;
                 return;
             }
 
-            // XÓA BỎ KÝ TỰ ĐẶC BIỆT để đánh giá phần chữ cốt lõi
+            // Stripping the worldly attachments (punctuation) to find the core word
             const cleanWord = token.replace(/[.,!?;()]/g, '').toLowerCase();
-            
-            // Giả lập hệ thống đánh giá Perplexity tại tầng vi mô:
-            // Trong hệ thống thực, mỗi 'cleanWord' sẽ được gửi tới C++ backend 
-            // để đối chiếu với cấu trúc cây cú pháp nhằm xuất ra một tỷ lệ xác suất.
-            
             let ontologyClass = '';
             
-            // Heuristics mô phỏng: 
-            // Các từ nối, từ chỉ cấu trúc logic hoàn hảo thường có tần suất xuất hiện cao trong văn bản AI.
-            const aiHeavyWords = ['hơn thế nữa', 'tuy nhiên', 'có thể thấy', 'đóng vai trò', 'quan trọng', 'tóm lại', 'vì vậy'];
-            const humanQuirks = ['đôi khi', 'thực sự', 'tôi', 'chúng ta', 'cảm giác', 'có lẽ', 'chắc hẳn', 'buồn'];
+            // Heuristics: Detecting the Machine
+            const aiHeavyWords = ['moreover', 'therefore', 'however', 'important', 'show', 'use', 'clear', 'very'];
+            const humanQuirks = ['perhaps', 'maybe', 'feel', 'I', 'we', 'sometimes', 'truly', 'sorrow'];
 
-            let isMachineLike = Math.random() > 0.6; // Giả lập ngẫu nhiên cho từ vựng thường
-
-            if (cleanWord.length > 7) {
-                // Từ dài thường có khuynh hướng được AI dùng để tạo sự học thuật bề mặt
-                ontologyClass = 'ai-med'; 
-            }
+            if (cleanWord.length > 8) ontologyClass = 'ai-med'; 
             
-            // Ghi đè bằng heuristics
-            aiHeavyWords.forEach(w => { if (cleanWord.includes(w)) ontologyClass = 'ai-high'; });
-            humanQuirks.forEach(w => { if (cleanWord.includes(w)) ontologyClass = 'human'; });
+            if (aiHeavyWords.includes(cleanWord)) ontologyClass = 'ai-high';
+            if (humanQuirks.includes(cleanWord)) ontologyClass = 'human';
 
-            // Trạng thái mặc định nếu không có dấu ấn rõ rệt
-            if (!ontologyClass) ontologyClass = isMachineLike ? 'ai-med' : '';
+            if (!ontologyClass) ontologyClass = Math.random() > 0.7 ? 'ai-med' : '';
 
-            // Bọc (Wrap) token vào trong các thẻ span mang thuộc tính bản thể luận
+            // Manifesting the token into the DOM
             if (ontologyClass) {
-                processedHTML += `<span class="token ${ontologyClass}" title="Nhấn để xem đề xuất tái cấu trúc">${token}</span>`;
+                // We embed the original clean word as a data attribute for fast dictionary lookup
+                processedHTML += `<span class="token ${ontologyClass}" data-word="${cleanWord}" onclick="invokeSynonymBoard(this, event)">${token}</span>`;
             } else {
                 processedHTML += token;
             }
         });
 
         outputCanvas.innerHTML = processedHTML;
+        hideSynonymBoard(); // Reset UI state
+    }
+
+    // --- 4. THE INTERACTIVE LOGIC (Event Delegation & Positioning) ---
+    function invokeSynonymBoard(element, event) {
+        event.stopPropagation(); // Prevent the document click from immediately hiding the board
+        activeTokenElement = element;
+        const coreWord = element.getAttribute('data-word');
+        const board = document.getElementById('synonymBoard');
+        const list = document.getElementById('synonymList');
+
+        // Retrieve profound synonyms or provide a structural fallback
+        const synonyms = ontologicalSynonyms[coreWord] || ['reconfigure', 'reconceptualize', 'refine'];
+
+        // Construct the list of alternatives
+        list.innerHTML = '';
+        synonyms.forEach(syn => {
+            const div = document.createElement('div');
+            div.className = 'synonym-item';
+            div.innerText = syn;
+            div.onclick = () => applyTransformation(syn);
+            list.appendChild(div);
+        });
+
+        // Spatial Mapping: Calculate exact coordinates to float the board above the token
+        const rect = element.getBoundingClientRect();
+        board.style.left = `${rect.left + window.scrollX}px`;
+        board.style.top = `${rect.bottom + window.scrollY + 5}px`;
+        
+        // Manifest the board
+        board.classList.add('visible');
+    }
+
+    function applyTransformation(newWord) {
+        if (!activeTokenElement) return;
+
+        // Preserve original punctuation by extracting it from the raw token
+        const originalText = activeTokenElement.innerText;
+        const punctuationMatch = originalText.match(/[.,!?;()]+$/);
+        const punctuation = punctuationMatch ? punctuationMatch[0] : '';
+        
+        // Check capitalization of the original word to maintain syntactic harmony
+        const isCapitalized = /^[A-Z]/.test(originalText);
+        let finalWord = newWord;
+        if (isCapitalized) {
+            finalWord = finalWord.charAt(0).toUpperCase() + finalWord.slice(1);
+        }
+
+        // Transmute the token
+        activeTokenElement.innerText = finalWord + punctuation;
+        
+        // Cleanse the token of its machine-like aura (remove red highlight, turn it green)
+        activeTokenElement.className = 'token human';
+        
+        hideSynonymBoard();
+    }
+
+    function hideSynonymBoard() {
+        const board = document.getElementById('synonymBoard');
+        board.classList.remove('visible');
+        setTimeout(() => {
+            if (!board.classList.contains('visible')) {
+                board.style.display = 'none';
+            }
+        }, 200); // Wait for the fade-out transition
+        board.style.display = 'block'; // Ensure it can be transitioned
     }
 </script>
 
